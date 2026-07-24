@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Logo from './Logo';
@@ -73,22 +73,36 @@ const icons = {
   ),
 };
 
-export default function Sidebar({ page, setPage, totalCases }) {
+export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
 
   return (
-    <motion.aside
-      className="sidebar"
-      initial={{ opacity: 0, x: -16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-    >
-      <div className="sidebar-header">
-        <div className="sidebar-brand">
-          <Logo variant="sidebar" />
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="sidebar-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+      <motion.aside
+        className={`sidebar ${isOpen ? 'sidebar-mobile-open' : ''}`}
+        initial={{ opacity: 0, x: -16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+      >
+        <div className="sidebar-header">
+          <div className="sidebar-brand">
+            <Logo variant="sidebar" />
+          </div>
+          <button className="sidebar-mobile-close" onClick={onClose} aria-label="Close menu">&times;</button>
         </div>
-      </div>
 
       <nav className="sidebar-nav" aria-label="Main navigation">
         <div className="sidebar-section">
@@ -241,5 +255,6 @@ export default function Sidebar({ page, setPage, totalCases }) {
         </motion.div>
       </div>
     </motion.aside>
+    </>
   );
 }

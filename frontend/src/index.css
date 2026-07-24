@@ -613,6 +613,25 @@ a:hover { text-decoration: underline; }
 
 .form-input.error { border-color: var(--danger); }
 
+.filter-select {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.85rem;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  min-width: 140px;
+}
+.filter-select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
 .form-error {
   font-size: 0.75rem;
   color: var(--danger);
@@ -2014,6 +2033,19 @@ a:hover { text-decoration: underline; }
    Responsive
    ══════════════════════════════════════════════════════════════ */
 
+/* ── Hamburger (hidden on desktop) ───────────────── */
+.hamburger-btn {
+  display: none;
+}
+
+/* ── Sidebar overlay (hidden on desktop) ──────────── */
+.sidebar-overlay {
+  display: none;
+}
+.sidebar-mobile-close {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .sidebar { width: 180px; }
   .charts-grid { grid-template-columns: 1fr; }
@@ -2025,42 +2057,181 @@ a:hover { text-decoration: underline; }
 }
 
 @media (max-width: 768px) {
-  .sidebar { width: 60px; }
-  .sidebar-label { display: none; }
-  .nav-link span { display: none; }
+  /* ── Layout ───────────────────────────────────── */
+  .app-shell {
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Hamburger button */
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-right: var(--space-2);
+    transition: background 0.15s, color 0.15s;
+  }
+  .hamburger-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+
+  /* ── Sidebar as fixed overlay ─────────────────── */
+  .sidebar {
+    position: fixed !important;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 310;
+    width: 260px !important;
+    height: 100vh;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+    border-right: 1px solid var(--border);
+  }
+  .sidebar.sidebar-mobile-open {
+    left: 0;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Sidebar overlay backdrop */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 305;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  /* Mobile close button in sidebar header */
+  .sidebar-mobile-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-tertiary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    margin-left: auto;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .sidebar-mobile-close:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+
+  /* Show nav labels in mobile overlay sidebar */
+  .nav-link span { display: inline; }
+  .sidebar-label { display: block; }
+  .sidebar-user-info { display: block; }
+
+  /* ── Topbar ────────────────────────────────────── */
   .sidebar-user-info, .topbar-divider, .topbar-subtitle, .topbar-date { display: none; }
   .topbar-center { max-width: 100%; }
+  .topbar-left h2 { font-size: 0.95rem; }
+  .topbar {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
 
+  /* ── Filters bar ───────────────────────────────── */
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filters-bar .search-field,
+  .filters-bar select,
+  .filters-bar button {
+    width: 100%;
+    min-width: 0;
+  }
+  .cases-header {
+    flex-wrap: wrap;
+  }
+  .cases-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* ── Stats & Charts ────────────────────────────── */
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .vis-grid { grid-template-columns: 1fr; }
-  .vis-header { flex-direction: column; align-items: stretch; }
-  .vis-header-actions { width: 100%; justify-content: space-between; }
 
+  /* ── Tables ────────────────────────────────────── */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 calc(-1 * var(--space-3));
+    padding: 0 var(--space-3);
+  }
+
+  /* ── Cards ─────────────────────────────────────── */
+  .card { padding: var(--space-3); }
+  .card-header {
+    padding: var(--space-2) var(--space-3);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .card-body.compact { padding: 0; }
+
+  /* ── Page Content ──────────────────────────────── */
+  .page-content {
+    padding: var(--space-3);
+  }
+  .dashboard-header {
+    margin-bottom: var(--space-3);
+  }
+  .dashboard-header h1 {
+    font-size: 1.15rem;
+  }
+
+  /* ── Forms ────────────────────────────────────── */
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── Pagination ───────────────────────────────── */
+  .pagination {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: center;
+    padding: var(--space-2) var(--space-3);
+  }
+  .pagination-info {
+    width: 100%;
+    text-align: center;
+    order: -1;
+  }
+
+  /* ── Calendar ─────────────────────────────────── */
   .calendar-header { flex-direction: column; align-items: stretch; }
   .calendar-nav { justify-content: center; }
   .calendar-actions { flex-direction: column; }
   .calendar-cell { min-height: 60px; }
   .calendar-cell-sessions .calendar-session-chip:nth-child(n+2) { display: none; }
 
+  /* ── Search panel ─────────────────────────────── */
   .search-panel { position: fixed; left: 60px; right: 0; top: auto; }
-}
 
-@media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .modal { max-width: 100%; border-radius: var(--radius-lg); margin: var(--space-2); }
-  .modal-lg, .modal-sm { max-width: 100%; }
-  .filters-bar .form-input, .filters-bar .form-select { min-width: 100px; }
-  .calendar-weekday { font-size: 0.6rem; padding: 4px 2px; }
-  .calendar-cell-day { font-size: 0.7rem; width: 20px; height: 20px; }
-  .calendar-title { font-size: 1rem; min-width: auto; }
-}
-
-@media (max-width: 480px) {
-  .vis-header-actions { flex-direction: column; }
-}
-
-/* ── Builder responsive ─────────────────────────── */
-@media (max-width: 768px) {
+  /* ── Vis / Builder ────────────────────────────── */
+  .vis-header { flex-direction: column; align-items: stretch; }
+  .vis-header-actions { width: 100%; justify-content: space-between; }
   .builder-tab-bar { flex-wrap: wrap; }
   .builder-tab {
     flex: 1;
@@ -2069,10 +2240,61 @@ a:hover { text-decoration: underline; }
     border-bottom: 2px solid transparent;
     padding: var(--space-2) var(--space-2);
   }
+
+  /* ── Documents ────────────────────────────────── */
+  .document-upload-area { flex-direction: column; align-items: stretch; }
+
+  /* ── Reports ──────────────────────────────────── */
+  .reports-grid { grid-template-columns: 1fr; }
+  .report-card-body .form-row { grid-template-columns: 1fr; }
+
+  /* ── Modals ───────────────────────────────────── */
+  .modal {
+    max-width: 100%;
+    margin: var(--space-2);
+    max-height: 90vh;
+    border-radius: var(--radius-lg);
+  }
+  .modal-lg, .modal-sm { max-width: 100%; }
+
+  /* ── Dashboard header row ─────────────────────── */
+  .dashboard-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
-@media (max-width: 768px) {
-  .document-upload-area { flex-direction: column; align-items: stretch; }
+@media (max-width: 480px) {
+  /* ── Single column everything ─────────────────── */
+  .stats-grid { grid-template-columns: 1fr; }
+  .vis-header-actions { flex-direction: column; }
+
+  /* ── Compact elements ─────────────────────────── */
+  .filters-bar .form-input,
+  .filters-bar .form-select { min-width: 0; }
+  .calendar-weekday { font-size: 0.6rem; padding: 4px 2px; }
+  .calendar-cell-day { font-size: 0.7rem; width: 20px; height: 20px; }
+  .calendar-title { font-size: 1rem; min-width: auto; }
+
+  /* ── Tighter spacing ──────────────────────────── */
+  .page-content { padding: var(--space-2); }
+  .topbar { padding: var(--space-1) var(--space-2); }
+  .topbar-left h2 { font-size: 0.85rem; }
+  .topbar-center { display: none; }
+  .topbar-right { gap: var(--space-1); }
+
+  /* ── Stack pagination controls ────────────────── */
+  .pagination-controls { flex-wrap: wrap; justify-content: center; }
+
+  /* ── Full-width modal on smallest screens ─────── */
+  .modal { margin: var(--space-1); border-radius: var(--radius-md); }
+  .modal-header { padding: var(--space-3) var(--space-4); }
+  .modal-body { padding: var(--space-3) var(--space-4); }
+  .modal-footer { padding: var(--space-2) var(--space-4); }
+
+  /* ── Login adjustments ────────────────────────── */
+  .login-page { padding: var(--space-2); }
+  .login-glass-card { padding: var(--space-4); }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -2204,11 +2426,6 @@ a:hover { text-decoration: underline; }
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
-}
-
-@media (max-width: 768px) {
-  .reports-grid { grid-template-columns: 1fr; }
-  .report-card-body .form-row { grid-template-columns: 1fr; }
 }
 
 /* ══════════════════════════════════════════════════════════════

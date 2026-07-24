@@ -103,6 +103,7 @@ function Shell() {
   const { user, loading } = useAuth();
   const [page, setPage] = useState('dashboard');
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // ── Update document title ──────────────────────────────────
   useEffect(() => {
@@ -140,6 +141,7 @@ function Shell() {
   const navigateTo = useCallback((p) => {
     if (p === 'shortcuts') { setShowShortcuts(true); return; }
     setPage(p);
+    setMobileMenuOpen(false);
   }, []);
 
   if (loading) {
@@ -176,10 +178,17 @@ function Shell() {
 
   return (
     <div className="app-shell">
-      <Sidebar page={page} setPage={navigateTo} />
+      <Sidebar page={page} setPage={navigateTo} isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
       <div className="main-area">
         <header className="topbar">
           <div className="topbar-left">
+            <button className="hamburger-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20" strokeLinecap="round">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
             <h2>{current.title}</h2>
             <span className="topbar-divider" />
             <span className="topbar-subtitle">{current.subtitle}</span>
