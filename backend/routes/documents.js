@@ -37,10 +37,9 @@ const upload = multer({
 });
 
 const router = Router();
-router.use(auth);
 
 // ── GET /api/cases/:caseId/documents — list documents for a case ──
-router.get('/cases/:caseId/documents', (req, res) => {
+router.get('/cases/:caseId/documents', auth, (req, res) => {
   const docs = db.prepare(
     'SELECT d.*, u.name AS uploaded_by_name FROM documents d LEFT JOIN users u ON u.id = d.uploaded_by WHERE d.case_id = ? ORDER BY d.created_at DESC'
   ).all(req.params.caseId);
@@ -48,7 +47,7 @@ router.get('/cases/:caseId/documents', (req, res) => {
 });
 
 // ── POST /api/cases/:caseId/documents — upload document ──────────
-router.post('/cases/:caseId/documents', upload.single('file'), (req, res) => {
+router.post('/cases/:caseId/documents', auth, upload.single('file'), (req, res) => {
   if (!req.file) return error(res, 400, 'No file provided.');
   const { originalname, mimetype, size, filename } = req.file;
 
@@ -67,7 +66,7 @@ router.post('/cases/:caseId/documents', upload.single('file'), (req, res) => {
 });
 
 // ── GET /api/documents/:id/download — download document ─────────
-router.get('/documents/:id/download', (req, res) => {
+router.get('/documents/:id/download', auth, (req, res) => {
   const doc = db.prepare('SELECT * FROM documents WHERE id = ?').get(req.params.id);
   if (!doc) throw new NotFoundError('Document');
 
@@ -80,7 +79,7 @@ router.get('/documents/:id/download', (req, res) => {
 });
 
 // ── DELETE /api/documents/:id — delete document ──────────────────
-router.delete('/documents/:id', (req, res) => {
+router.delete('/documents/:id', auth, (req, res) => {
   const doc = db.prepare('SELECT * FROM documents WHERE id = ?').get(req.params.id);
   if (!doc) throw new NotFoundError('Document');
 
