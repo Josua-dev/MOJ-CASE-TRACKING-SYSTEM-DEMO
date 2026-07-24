@@ -1,0 +1,843 @@
+openapi: "3.0.3"
+info:
+  title: MOJ Case Tracking System API
+  description: |
+    RESTful API for the Republic of Namibia Ministry of Justice
+    Magistrate Court Case Tracking System.
+
+    Features:
+    - JWT-based authentication with httpOnly cookies
+    - CRUD operations for magistrate cases
+    - Atomic case numbering (MOJ-YYYY-NNNN)
+    - Full-text search across case fields
+    - Pagination, filtering, and sorting
+    - CSV data export
+    - Dashboard statistics with date range filtering
+    - Audit log trail for each case
+    - CSRF protection on mutating requests
+    - Request ID tracing for debugging
+  version: 1.2.0
+  contact:
+    name: Ministry of Justice, Republic of Namibia
+    url: https://www.moj.gov.na
+  license:
+    name: UNLICENSED
+servers:
+  - url: http://localhost:5000/api
+    description: Development server
+  - url: https://moj-cases.example.com/api
+    description: Production server
+
+# ──────────────────────────────────────────────────────────────
+# Components
+# ──────────────────────────────────────────────────────────────
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: An optional alternative to the httpOnly cookie. Send `Authorization: Bearer <token>`.
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: moj_token
+      description: JWT stored in an httpOnly, SameSite=strict cookie set at login.
+
+  schemas:
+    # ── Envelope ───────────────────────────────────────────
+    ApiSuccess:
+      type: object
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+          example: true
+        data:
+          type: object
+          nullable: true
+        meta:
+          type: object
+          nullable: true
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 42
+            totalPages:
+              type: integer
+              example: 3
+
+    ApiError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+          example: false
+        error:
+          type: string
+          example: "Invalid credentials."
+        code:
+          type: string
+          example: "UNAUTHORIZED"
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationDetail'
+
+    ValidationDetail:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "email"
+        message:
+          type: string
+          example: "A valid email address is required."
+
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              example: "ok"
+            system:
+              type: string
+              example: "MOJ Case Tracking System"
+            version:
+              type: string
+              example: "1.2.0"
+            environment:
+              type: string
+              example: "development"
+            requestId:
+              type: string
+              example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+    # ── Auth ──────────────────────────────────────────────
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@moj.gov.na
+        password:
+          type: string
+          minLength: 6
+          example: admin123
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              description: JWT access token (also set as httpOnly cookie)
+            user:
+              $ref: '#/components/schemas/User'
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: clerk@moj.gov.na
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+        role:
+          type: string
+          enum: [admin, clerk]
+          default: clerk
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [admin, clerk]
+
+    # ── Case ──────────────────────────────────────────────
+    Case:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        case_number:
+          type: string
+          example: "MOJ-2026-0042"
+        title:
+          type: string
+          example: "State v. Nampol Officer"
+        case_type:
+          type: string
+          enum: [Criminal, Civil, Family, Commercial, Labour]
+        status:
+          type: string
+          enum: [Open, Active, Pending, Closed]
+        priority:
+          type: string
+          enum: [Low, Medium, High]
+        plaintiff:
+          type: string
+          example: "State of Namibia"
+        defendant:
+          type: string
+          example: "Accused Person"
+        presiding_officer:
+          type: string
+          nullable: true
+          example: "Magistrate Kandara"
+        hearing_date:
+          type: string
+          format: date
+          nullable: true
+        next_action:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+          format: uuid
+
+    CaseDetail:
+      allOf:
+        - $ref: '#/components/schemas/Case'
+        - type: object
+          properties:
+            logs:
+              type: array
+              items:
+                $ref: '#/components/schemas/CaseLog'
+
+    CaseLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        case_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        user_name:
+          type: string
+          example: "Admin User"
+        action:
+          type: string
+          example: "Status Updated"
+        note:
+          type: string
+          nullable: true
+          example: "Changed from Open to Active"
+        performed_at:
+          type: string
+          format: date-time
+
+    CreateCaseRequest:
+      type: object
+      required: [title, plaintiff, defendant]
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          example: "State v. Nampol Officer"
+        case_type:
+          type: string
+          enum: [Criminal, Civil, Family, Commercial, Labour]
+          default: Criminal
+        status:
+          type: string
+          enum: [Open, Active, Pending, Closed]
+          default: Open
+        priority:
+          type: string
+          enum: [Low, Medium, High]
+          default: Medium
+        plaintiff:
+          type: string
+          maxLength: 200
+          example: "State of Namibia"
+        defendant:
+          type: string
+          maxLength: 200
+          example: "Accused Person"
+        presiding_officer:
+          type: string
+          maxLength: 200
+        hearing_date:
+          type: string
+          format: date
+        next_action:
+          type: string
+          maxLength: 500
+        description:
+          type: string
+          maxLength: 5000
+
+    UpdateCaseRequest:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        case_type:
+          type: string
+          enum: [Criminal, Civil, Family, Commercial, Labour]
+        status:
+          type: string
+          enum: [Open, Active, Pending, Closed]
+        priority:
+          type: string
+          enum: [Low, Medium, High]
+        plaintiff:
+          type: string
+          maxLength: 200
+        defendant:
+          type: string
+          maxLength: 200
+        presiding_officer:
+          type: string
+          maxLength: 200
+        hearing_date:
+          type: string
+          format: date
+        next_action:
+          type: string
+          maxLength: 500
+        description:
+          type: string
+          maxLength: 5000
+
+    NoteRequest:
+      type: object
+      required: [note]
+      properties:
+        note:
+          type: string
+          maxLength: 2000
+          example: "Evidence submission received from prosecution."
+
+    DashboardStats:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 150
+        open:
+          type: integer
+          example: 45
+        active:
+          type: integer
+          example: 62
+        closed:
+          type: integer
+          example: 28
+        pending:
+          type: integer
+          example: 15
+        high:
+          type: integer
+          example: 12
+        byType:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: "Criminal"
+              count:
+                type: integer
+                example: 80
+        recent:
+          type: array
+          items:
+            $ref: '#/components/schemas/Case'
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 42
+        totalPages:
+          type: integer
+          example: 3
+
+    # ── CSRF ──────────────────────────────────────────────
+    CsrfTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            csrfToken:
+              type: string
+              example: "ABCDEF123456..."
+
+# ──────────────────────────────────────────────────────────────
+# Security
+# ──────────────────────────────────────────────────────────────
+security:
+  - CookieAuth: []
+  - BearerAuth: []
+
+# ──────────────────────────────────────────────────────────────
+# Paths
+# ──────────────────────────────────────────────────────────────
+paths:
+  # ── Health ──────────────────────────────────────────────
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      description: Returns system health, version, and environment info. Public endpoint.
+      tags: [System]
+      security: []
+      responses:
+        "200":
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # ── CSRF Token ──────────────────────────────────────────
+  /csrf-token:
+    get:
+      operationId: getCsrfToken
+      summary: Get CSRF token
+      description: Returns a CSRF token that must be included in mutating requests (POST/PUT/DELETE) via the `csrf-token` header.
+      tags: [System]
+      security: []
+      responses:
+        "200":
+          description: CSRF token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfTokenResponse'
+
+  # ── Auth ───────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      summary: User login
+      description: Authenticates a user and returns a JWT token. Also sets an httpOnly cookie.
+      tags: [Authentication]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        "200":
+          description: Login successful — returns JWT token and user info
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "moj_token=eyJ...; HttpOnly; Secure; SameSite=Strict"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "429":
+          description: Too many login attempts (rate limited)
+
+  /auth/register:
+    post:
+      operationId: register
+      summary: Register new user
+      description: Creates a new user account. Admin or clerk role.
+      tags: [Authentication]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccess'
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # ── Cases ──────────────────────────────────────────────
+  /cases:
+    get:
+      operationId: listCases
+      summary: List/search cases
+      description: |
+        Returns paginated cases with optional full-text search, status/type/priority
+        filtering, and sorting. Columns safe-listed to prevent injection.
+      tags: [Cases]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search term matched against case number, title, plaintiff, and defendant
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Open, Active, Pending, Closed]
+          description: Filter by case status
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [Criminal, Civil, Family, Commercial, Labour]
+          description: Filter by case type
+        - name: priority
+          in: query
+          schema:
+            type: string
+            enum: [Low, Medium, High]
+          description: Filter by priority
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [created_at, updated_at, case_number, title, status, priority, hearing_date]
+            default: created_at
+          description: Sort column
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort direction
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Results per page
+      responses:
+        "200":
+          description: Paginated case list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccess'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Case'
+                      meta:
+                        $ref: '#/components/schemas/PaginationMeta'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    post:
+      operationId: createCase
+      summary: Create a new case
+      description: Creates a case with an auto-generated atomic case number (MOJ-YYYY-NNNN).
+      tags: [Cases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCaseRequest'
+      responses:
+        "201":
+          description: Case created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccess'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          case_number:
+                            type: string
+                            example: "MOJ-2026-0042"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+
+  # ── Case detail ─────────────────────────────────────────
+  /cases/{id}:
+    get:
+      operationId: getCase
+      summary: Get case details with audit trail
+      description: Returns a single case along with its full audit log.
+      tags: [Cases]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Case UUID
+      responses:
+        "200":
+          description: Case detail with logs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccess'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CaseDetail'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Case not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    put:
+      operationId: updateCase
+      summary: Update a case
+      description: |
+        Updates one or more fields on a case. If the status field is changed,
+        an audit log entry is automatically created noting the transition.
+      tags: [Cases]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Case UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCaseRequest'
+      responses:
+        "200":
+          description: Case updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccess'
+        "400":
+          description: Validation error or no fields provided
+        "401":
+          description: Unauthorized
+        "404":
+          description: Case not found
+
+  # ── Case logs (notes) ──────────────────────────────────
+  /cases/{id}/logs:
+    post:
+      operationId: addCaseNote
+      summary: Add a note to a case
+      description: Appends an audit log entry with a free-text note.
+      tags: [Cases]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Case UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteRequest'
+      responses:
+        "201":
+          description: Note added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccess'
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized
+        "404":
+          description: Case not found
+
+  # ── CSV Export ─────────────────────────────────────────
+  /cases/export/csv:
+    get:
+      operationId: exportCasesCsv
+      summary: Export cases as CSV
+      description: Returns all cases as a CSV file download.
+      tags: [Cases]
+      responses:
+        "200":
+          description: CSV file download
+          content:
+            text/csv:
+              schema:
+                type: string
+                example: "Case Number,Title,Type,Status\nMOJ-2026-0001,State v. Accused,Criminal,Open\n"
+        "401":
+          description: Unauthorized
+
+  # ── Dashboard stats ────────────────────────────────────
+  /cases/meta/stats:
+    get:
+      operationId: getDashboardStats
+      summary: Get dashboard statistics
+      description: |
+        Returns aggregate statistics for the dashboard: total counts by status,
+        priority, type breakdown, and recent cases. Supports optional date filtering.
+      tags: [Cases]
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Inclusive start date (ISO 8601)
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Inclusive end date (ISO 8601)
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccess'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DashboardStats'
+        "401":
+          description: Unauthorized
+
+# ──────────────────────────────────────────────────────────────
+# Tags
+# ──────────────────────────────────────────────────────────────
+tags:
+  - name: System
+    description: System health and utility endpoints (no auth required)
+  - name: Authentication
+    description: User login and registration
+  - name: Cases
+    description: Case management — CRUD, search, export, statistics (auth required)
