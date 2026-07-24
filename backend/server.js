@@ -17,6 +17,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const path = require('path');
 
 const config = require('./src/config');
 const { success } = require('./src/response');
@@ -95,8 +96,17 @@ app.use('/api/search', require('./routes/search')); // GET-only, auth via middle
 app.use('/api/notifications', csrfProtection, require('./routes/notifications'));
 app.use('/api/reports', csrfProtection, require('./routes/reports'));
 
-// ── 404 catch-all ─────────────────────────────────────────────
+// ── Production: serve React build ─────────────────────────────
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '..', 'frontend', 'build')));
+}
+
+// ── 404 catch-all / SPA fallback ──────────────────────────────
 app.use((req, res) => {
+  // In production, let React Router handle non-API routes (SPA)
+  if (process.env.NODE_ENV === 'production' && !req.path.startsWith('/api')) {
+    return res.sendFile(path.join(__dirname, '..', 'frontend', 'build', 'index.html'));
+  }
   res.status(404).json({ success: false, error: 'Route not found.', code: 'NOT_FOUND' });
 });
 
@@ -121,6 +131,13 @@ app.use((err, req, res, _next) => {
 
 // ── Start (only when run directly, not during tests) ──────────
 if (process.env.NODE_ENV !== 'test') {
+  // Seed 260+ realistic Namibian cases on fresh database (idempotent)
+  try {
+    require('./db/seed-cases');
+  } catch (e) {
+    logger.warn({ err: e.message }, 'Case seeding skipped (non-fatal)');
+  }
+
   app.listen(config.port, () => {
     logger.info({ port: config.port, env: config.env },
       `⚖️  MOJ Backend v1.2.0 running on http://localhost:${config.port} [${config.env}]`);

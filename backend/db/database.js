@@ -190,6 +190,38 @@ try {
   db.prepare("ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1").run();
 } catch (_) { /* column may already exist */ }
 
+// Migrate case_logs: rename performed_by → user_id if needed
+try {
+  const cols = db.prepare("PRAGMA table_info(case_logs)").all().map(c => c.name);
+  if (cols.includes('performed_by') && !cols.includes('user_id')) {
+    db.prepare("ALTER TABLE case_logs ADD COLUMN user_id TEXT REFERENCES users(id)").run();
+    db.prepare("UPDATE case_logs SET user_id = performed_by WHERE user_id IS NULL").run();
+    console.log('✅ Migrated case_logs: added user_id column from performed_by data.');
+  } else if (!cols.includes('user_id')) {
+    db.prepare("ALTER TABLE case_logs ADD COLUMN user_id TEXT REFERENCES users(id)").run();
+    console.log('✅ Added user_id column to case_logs.');
+  }
+  // Make performed_by nullable (SQLite requires table recreation)
+  const pcol = db.prepare("PRAGMA table_info(case_logs)").all().find(c => c.name === 'performed_by');
+  if (pcol && pcol.notnull) {
+    db.exec(`
+      CREATE TABLE case_logs_new (
+        id TEXT PRIMARY KEY,
+        case_id TEXT NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+        user_id TEXT REFERENCES users(id),
+        action TEXT NOT NULL,
+        note TEXT DEFAULT '',
+        performed_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO case_logs_new (id, case_id, user_id, action, note, performed_at)
+        SELECT id, case_id, user_id, action, note, performed_at FROM case_logs;
+      DROP TABLE case_logs;
+      ALTER TABLE case_logs_new RENAME TO case_logs;
+    `);
+    console.log('✅ Migrated case_logs: removed performed_by column.');
+  }
+} catch (_) { /* migration may already be done */ }
+
 // ──────────────────────────────────────────────
 // FTS5 Full-Text Search virtual tables
 // ──────────────────────────────────────────────

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: moj-case-tracker
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install
+    startCommand: cd backend && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://moj-case-tracker.onrender.com

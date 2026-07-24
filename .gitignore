@@ -36,6 +36,9 @@ docker-data/
 *.log
 logs/
 
+# ── Uploads ───────────────────────────────────────────────
+backend/uploads/
+
 # ── Coverage ──────────────────────────────────────────────
 coverage/
 
