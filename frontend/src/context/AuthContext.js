@@ -12,20 +12,30 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Restore session from localStorage on mount
+    // Verify token with backend on mount
     const storedToken = localStorage.getItem('moj_token');
-    const storedUser = localStorage.getItem('moj_user');
-    if (storedToken && storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-      } catch {
-        localStorage.removeItem('moj_token');
-        localStorage.removeItem('moj_user');
-      }
+    if (storedToken) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      axios.get('/api/auth/me')
+        .then(({ data }) => {
+          if (data.success) {
+            setUser(data.data.user);
+            localStorage.setItem('moj_user', JSON.stringify(data.data.user));
+          } else {
+            localStorage.removeItem('moj_token');
+            localStorage.removeItem('moj_user');
+            delete axios.defaults.headers.common['Authorization'];
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem('moj_token');
+          localStorage.removeItem('moj_user');
+          delete axios.defaults.headers.common['Authorization'];
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   async function login(email, password) {

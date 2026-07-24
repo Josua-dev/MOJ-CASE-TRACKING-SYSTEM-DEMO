@@ -71,4 +71,11 @@ router.post('/register', validate(registerSchema), (req, res) => {
   return success(res, { message: 'User created successfully.' }, {}, 201);
 });
 
+// ── GET /me — verify token & return user ───────────────────────
+router.get('/me', require('../middleware/auth'), (req, res) => {
+  const user = db.prepare('SELECT id, name, email, role FROM users WHERE id = ?').get(req.user.id);
+  if (!user) return error(res, 401, 'User no longer exists.');
+  return success(res, { user });
+});
+
 module.exports = router;
