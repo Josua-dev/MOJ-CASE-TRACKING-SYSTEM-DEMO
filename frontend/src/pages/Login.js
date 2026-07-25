@@ -235,18 +235,17 @@ const lgnStyles = `
 
 const pageStyle = {
   background: `
-    radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px),
     linear-gradient(
       155deg,
-      #00122b 0%,
-      #002250 20%,
-      #003580 45%,
-      #002a5c 70%,
-      #001a3a 100%
-    )
+      rgba(0,18,43,0.77) 0%,
+      rgba(0,34,80,0.72) 20%,
+      rgba(0,53,128,0.67) 45%,
+      rgba(0,42,92,0.72) 70%,
+      rgba(0,26,58,0.80) 100%
+    ),
+    url('/images/court-bg.jpg') center / cover no-repeat
   `,
-  backgroundSize: '24px 24px, 100% 100%',
-  backgroundAttachment: 'fixed',
+  backgroundAttachment: 'fixed, fixed',
 };
 
 const overlayStyle = {
