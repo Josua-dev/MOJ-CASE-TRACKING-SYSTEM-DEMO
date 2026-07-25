@@ -3,9 +3,16 @@ import { motion } from 'motion/react';
 import axios from 'axios';
 
 const EMPTY = {
-  title: '', case_type: 'Criminal', status: 'Open', priority: 'Medium',
-  plaintiff: '', defendant: '', presiding_officer: '', hearing_date: '',
-  next_action: '', description: '',
+  title: '',
+  case_type: 'Criminal',
+  status: 'Open',
+  priority: 'Medium',
+  plaintiff: '',
+  defendant: '',
+  presiding_officer: '',
+  hearing_date: '',
+  next_action: '',
+  description: '',
 };
 
 const CASE_TYPES = ['Criminal', 'Civil', 'Family', 'Commercial', 'Labour'];
@@ -28,11 +35,18 @@ export default function CaseModal({ onClose, onSaved, existing }) {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'Tab') {
-        const focusable = document.querySelectorAll('.modal input, .modal select, .modal textarea, .modal button:not([disabled])');
+        const focusable = document.querySelectorAll(
+          '.modal input, .modal select, .modal textarea, .modal button:not([disabled])'
+        );
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -40,16 +54,19 @@ export default function CaseModal({ onClose, onSaved, existing }) {
   }, [onClose]);
 
   function set(k, v) {
-    setForm(prev => ({ ...prev, [k]: v }));
-    if (fieldErrors[k]) setFieldErrors(prev => ({ ...prev, [k]: undefined }));
+    setForm((prev) => ({ ...prev, [k]: v }));
+    if (fieldErrors[k])
+      setFieldErrors((prev) => ({ ...prev, [k]: undefined }));
     if (error) setError('');
   }
 
   function validate() {
     const errs = {};
     if (!form.title?.trim()) errs.title = 'Case title is required.';
-    if (!form.plaintiff?.trim()) errs.plaintiff = 'Plaintiff name is required.';
-    if (!form.defendant?.trim()) errs.defendant = 'Defendant name is required.';
+    if (!form.plaintiff?.trim())
+      errs.plaintiff = 'Plaintiff name is required.';
+    if (!form.defendant?.trim())
+      errs.defendant = 'Defendant name is required.';
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -76,58 +93,157 @@ export default function CaseModal({ onClose, onSaved, existing }) {
 
   const Field = ({ name, label, type = 'text', required, options, placeholder }) => {
     const hasError = !!fieldErrors[name];
+    const id = `case-field-${name}`;
+    const sharedInputStyle = {
+      width: '100%',
+      padding: '10px 12px',
+      fontSize: '0.85rem',
+      fontFamily: 'inherit',
+      border: `1px solid ${hasError ? 'var(--danger)' : 'var(--border)'}`,
+      borderRadius: 8,
+      background: 'var(--surface)',
+      color: 'var(--text-primary)',
+      transition: 'border-color 0.15s, box-shadow 0.15s',
+      outline: 'none',
+    };
+
     if (options) {
       return (
-        <div className="form-group">
-          <label className="form-label" htmlFor={`field-${name}`}>
-            {label}{required && <span className="required">*</span>}
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <label
+            htmlFor={id}
+            style={{
+              display: 'block',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              color: 'var(--text-secondary)',
+              marginBottom: 4,
+            }}
+          >
+            {label}
+            {required && (
+              <span style={{ color: 'var(--danger)', marginLeft: 2 }}>*</span>
+            )}
           </label>
           <select
-            id={`field-${name}`}
-            className={`form-select ${hasError ? 'error' : ''}`}
+            id={id}
             value={form[name]}
-            onChange={e => set(name, e.target.value)}
+            onChange={(e) => set(name, e.target.value)}
+            style={{
+              ...sharedInputStyle,
+              cursor: 'pointer',
+              appearance: 'auto',
+              paddingRight: 8,
+            }}
+            aria-label={label}
           >
-            {options.map(o => <option key={o}>{o}</option>)}
+            {options.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
           </select>
-          {hasError && <p className="form-error">{fieldErrors[name]}</p>}
+          {hasError && (
+            <p
+              style={{
+                fontSize: '0.75rem',
+                color: 'var(--danger)',
+                marginTop: 4,
+              }}
+            >
+              {fieldErrors[name]}
+            </p>
+          )}
         </div>
       );
     }
+
     if (type === 'textarea') {
       return (
-        <div className="form-group">
-          <label className="form-label" htmlFor={`field-${name}`}>
-            {label}{required && <span className="required">*</span>}
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <label
+            htmlFor={id}
+            style={{
+              display: 'block',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              color: 'var(--text-secondary)',
+              marginBottom: 4,
+            }}
+          >
+            {label}
+            {required && (
+              <span style={{ color: 'var(--danger)', marginLeft: 2 }}>*</span>
+            )}
           </label>
           <textarea
-            id={`field-${name}`}
-            className={`form-textarea ${hasError ? 'error' : ''}`}
+            id={id}
             value={form[name]}
-            onChange={e => set(name, e.target.value)}
+            onChange={(e) => set(name, e.target.value)}
             rows={3}
             placeholder={placeholder}
+            style={{
+              ...sharedInputStyle,
+              resize: 'vertical',
+              minHeight: 72,
+            }}
+            aria-label={label}
           />
-          {hasError && <p className="form-error">{fieldErrors[name]}</p>}
+          {hasError && (
+            <p
+              style={{
+                fontSize: '0.75rem',
+                color: 'var(--danger)',
+                marginTop: 4,
+              }}
+            >
+              {fieldErrors[name]}
+            </p>
+          )}
         </div>
       );
     }
+
     return (
-      <div className="form-group">
-        <label className="form-label" htmlFor={`field-${name}`}>
-          {label}{required && <span className="required">*</span>}
+      <div style={{ marginBottom: 'var(--space-4)' }}>
+        <label
+          htmlFor={id}
+          style={{
+            display: 'block',
+            fontSize: '0.8rem',
+            fontWeight: 500,
+            color: 'var(--text-secondary)',
+            marginBottom: 4,
+          }}
+        >
+          {label}
+          {required && (
+            <span style={{ color: 'var(--danger)', marginLeft: 2 }}>*</span>
+          )}
         </label>
         <input
-          id={`field-${name}`}
+          id={id}
           ref={name === 'title' ? titleRef : undefined}
           type={type}
-          className={`form-input ${hasError ? 'error' : ''}`}
           value={form[name]}
-          onChange={e => set(name, e.target.value)}
+          onChange={(e) => set(name, e.target.value)}
           placeholder={placeholder}
-          required={required}
+          style={{
+            ...sharedInputStyle,
+          }}
+          aria-label={label}
         />
-        {hasError && <p className="form-error">{fieldErrors[name]}</p>}
+        {hasError && (
+          <p
+            style={{
+              fontSize: '0.75rem',
+              color: 'var(--danger)',
+              marginTop: 4,
+            }}
+          >
+            {fieldErrors[name]}
+          </p>
+        )}
       </div>
     );
   };
@@ -139,62 +255,323 @@ export default function CaseModal({ onClose, onSaved, existing }) {
       role="dialog"
       aria-modal="true"
       aria-label={existing ? 'Edit case' : 'Open new case'}
+      style={{
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+      }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.15 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
     >
       <motion.div
         className="modal"
-        initial={{ opacity: 0, scale: 0.95, y: 12 }}
+        style={{
+          background: 'var(--glass-bg)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid var(--glass-border)',
+          boxShadow: '0 32px 64px rgba(0,0,0,0.15), 0 8px 16px rgba(0,0,0,0.06)',
+        }}
+        initial={{ opacity: 0, scale: 0.94, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
+        exit={{ opacity: 0, scale: 0.94, y: 20 }}
+        transition={{
+          type: 'spring',
+          duration: 0.35,
+          bounce: 0.15,
+          ease: 'easeOut',
+        }}
       >
-        <div className="modal-header">
-          <h3>{existing ? 'Edit Case' : 'Open New Case'}</h3>
-          <button className="modal-close" onClick={onClose} aria-label="Close">&times;</button>
+        <div
+          className="modal-header"
+          style={{
+            padding: 'var(--space-4) var(--space-5)',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>
+            {existing ? 'Edit Case' : 'Open New Case'}
+          </h3>
+          <button
+            className="modal-close"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 30,
+              height: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'none',
+              border: 'none',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '1.3rem',
+              color: 'var(--text-tertiary)',
+              transition: 'all 0.12s',
+            }}
+          >
+            &times;
+          </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="modal-body">
+          <div
+            className="modal-body"
+            style={{
+              padding: 'var(--space-5)',
+              overflowY: 'auto',
+              flex: 1,
+            }}
+          >
             {error && (
-              <div className="login-error">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '10px 12px',
+                  background: 'var(--danger-light)',
+                  border: '1px solid rgba(185,28,28,0.25)',
+                  borderRadius: 8,
+                  color: 'var(--danger)',
+                  fontSize: '0.82rem',
+                  marginBottom: 'var(--space-4)',
+                }}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  width="16"
+                  height="16"
+                  style={{ flexShrink: 0 }}
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="15" y1="9" x2="9" y2="15" />
+                  <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
                 {error}
               </div>
             )}
 
-            <Field name="title" label="Case Title" required placeholder="e.g. State v. Accused Person" />
-
-            <div className="form-row">
-              <Field name="case_type" label="Case Type" options={CASE_TYPES} />
-              <Field name="status" label="Status" options={STATUSES} />
+            {/* Section: Basic Info */}
+            <div style={{ marginBottom: 'var(--space-3)' }}>
+              <h4
+                style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginBottom: 'var(--space-3)',
+                }}
+              >
+                Basic Information
+              </h4>
+              <Field
+                name="title"
+                label="Case Title"
+                required
+                placeholder="e.g. State v. Accused Person"
+              />
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 'var(--space-3)',
+                }}
+              >
+                <Field
+                  name="case_type"
+                  label="Case Type"
+                  options={CASE_TYPES}
+                />
+                <Field name="status" label="Status" options={STATUSES} />
+              </div>
             </div>
 
-            <div className="form-row">
-              <Field name="plaintiff" label="Plaintiff" required placeholder="e.g. State of Namibia" />
-              <Field name="defendant" label="Defendant" required placeholder="e.g. Accused Person" />
+            {/* Section: Parties */}
+            <div
+              style={{
+                marginBottom: 'var(--space-3)',
+                paddingTop: 'var(--space-2)',
+                borderTop: '1px solid var(--border)',
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginBottom: 'var(--space-3)',
+                }}
+              >
+                Parties
+              </h4>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 'var(--space-3)',
+                }}
+              >
+                <Field
+                  name="plaintiff"
+                  label="Plaintiff"
+                  required
+                  placeholder="e.g. State of Namibia"
+                />
+                <Field
+                  name="defendant"
+                  label="Defendant"
+                  required
+                  placeholder="e.g. Accused Person"
+                />
+              </div>
             </div>
 
-            <div className="form-row">
-              <Field name="presiding_officer" label="Presiding Officer" placeholder="e.g. Magistrate Shikongo" />
-              <Field name="priority" label="Priority" options={PRIORITIES} />
+            {/* Section: Court Details */}
+            <div
+              style={{
+                marginBottom: 'var(--space-3)',
+                paddingTop: 'var(--space-2)',
+                borderTop: '1px solid var(--border)',
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginBottom: 'var(--space-3)',
+                }}
+              >
+                Court Details
+              </h4>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 'var(--space-3)',
+                }}
+              >
+                <Field
+                  name="presiding_officer"
+                  label="Presiding Officer"
+                  placeholder="e.g. Magistrate Shikongo"
+                />
+                <Field name="priority" label="Priority" options={PRIORITIES} />
+              </div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 'var(--space-3)',
+                }}
+              >
+                <Field
+                  name="hearing_date"
+                  label="Hearing Date"
+                  type="date"
+                />
+                <Field
+                  name="next_action"
+                  label="Next Action"
+                  placeholder="e.g. Evidence hearing"
+                />
+              </div>
             </div>
 
-            <div className="form-row">
-              <Field name="hearing_date" label="Hearing Date" type="date" />
-              <Field name="next_action" label="Next Action" placeholder="e.g. Evidence hearing" />
+            {/* Section: Notes */}
+            <div
+              style={{
+                paddingTop: 'var(--space-2)',
+                borderTop: '1px solid var(--border)',
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginBottom: 'var(--space-3)',
+                }}
+              >
+                Notes
+              </h4>
+              <Field
+                name="description"
+                label="Description / Notes"
+                type="textarea"
+                placeholder="Enter case details, background information, or special instructions..."
+              />
             </div>
-
-            <Field name="description" label="Description / Notes" type="textarea" placeholder="Enter case details, background information, or special instructions..." />
           </div>
 
-          <div className="modal-footer">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-accent" disabled={saving}>
-              {saving ? (
-                <><span className="spinner spinner-sm" /> Saving...</>
-              ) : existing ? 'Save Changes' : 'Open Case'}
-            </button>
+          <div
+            className="modal-footer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: 'var(--space-3) var(--space-5)',
+              borderTop: '1px solid var(--border)',
+              flexShrink: 0,
+              gap: 'var(--space-2)',
+            }}
+          >
+            <div />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-accent"
+                disabled={saving}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 18px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  borderRadius: 6,
+                  border: 'none',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  background: '#003580',
+                  color: '#fff',
+                  opacity: saving ? 0.6 : 1,
+                  transition: 'all 0.12s',
+                }}
+              >
+                {saving ? (
+                  <>
+                    <span
+                      className="spinner spinner-sm"
+                      style={{
+                        width: 14,
+                        height: 14,
+                        border: '2px solid rgba(255,255,255,0.3)',
+                        borderTopColor: '#fff',
+                        borderRadius: '50%',
+                        animation: 'spin 0.6s linear infinite',
+                      }}
+                    />
+                    Saving...
+                  </>
+                ) : existing ? (
+                  'Save Changes'
+                ) : (
+                  'Open Case'
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </motion.div>

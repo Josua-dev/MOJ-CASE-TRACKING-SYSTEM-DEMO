@@ -18,10 +18,41 @@ const SESSION_COLORS = {
 const DEFAULT_COLOR = { bg: 'var(--surface-active)', text: 'var(--text-secondary)', border: 'var(--border)' };
 const STATUS_COLORS = { Scheduled: 'var(--info)', Completed: 'var(--success)', Cancelled: 'var(--danger)', Adjourned: 'var(--warning)' };
 
+// ── Inline style tokens for glassmorphism and layout ──────
+const glassCard = {
+  background: 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)',
+  border: '1px solid rgba(255,255,255,0.06)',
+  borderRadius: 'var(--radius-lg, 16px)',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08)',
+  overflow: 'hidden',
+};
+
+const pageContainer = {
+  maxWidth: 1200,
+  margin: '0 auto',
+  padding: '24px',
+};
+
+const skeletonItem = {
+  background: 'var(--skeleton-bg, rgba(255,255,255,0.06))',
+  borderRadius: 8,
+  animation: 'pulse 1.5s ease-in-out infinite',
+};
+
+const emptyIcon = {
+  width: 56,
+  height: 56,
+  opacity: 0.4,
+  marginBottom: 20,
+};
+
 function getSessionColor(type) {
   return SESSION_COLORS[type] || DEFAULT_COLOR;
 }
 
+// ── Session Modal ──────────────────────────────────────────
 function SessionModal({ session, courtrooms, cases, onClose, onSaved, onDeleted }) {
   const isNew = !session?.id;
   const [form, setForm] = useState({
@@ -174,6 +205,7 @@ function SessionModal({ session, courtrooms, cases, onClose, onSaved, onDeleted 
   );
 }
 
+// ── Session Detail Modal ──────────────────────────────────
 function SessionDetailModal({ session, onClose }) {
   if (!session) return null;
   const color = getSessionColor(session.session_type);
@@ -250,6 +282,7 @@ function SessionDetailModal({ session, onClose }) {
   );
 }
 
+// ── Calendar Cell ──────────────────────────────────────────
 function CalendarCell({ day, dateStr, sessions, today, currentMonth, onDayClick, onSessionClick }) {
   const isToday = dateStr === today;
   const isCurrentMonth = day !== null;
@@ -264,10 +297,29 @@ function CalendarCell({ day, dateStr, sessions, today, currentMonth, onDayClick,
       transition={{ duration: 0.12 }}
     >
       <div className="calendar-cell-header">
-        <span className={`calendar-cell-day ${isToday ? 'today-badge' : ''}`}>
+        <span
+          className={`calendar-cell-day ${isToday ? 'today-badge' : ''}`}
+          style={isToday ? {
+            background: 'var(--primary)',
+            color: '#fff',
+            borderRadius: '50%',
+            width: 28,
+            height: 28,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 0 2px var(--primary), 0 0 20px rgba(99,102,241,0.35)',
+            fontSize: 13,
+            fontWeight: 700,
+          } : {}}
+        >
           {day !== null ? day : ''}
         </span>
-        {daySessions.length > 0 && <span className="calendar-cell-count">{daySessions.length}</span>}
+        {daySessions.length > 0 && (
+          <span className="calendar-cell-count" style={{ fontWeight: 600, fontSize: 10 }}>
+            {daySessions.length}
+          </span>
+        )}
       </div>
       <div className="calendar-cell-sessions">
         {daySessions.slice(0, maxVisible).map(s => {
@@ -276,23 +328,46 @@ function CalendarCell({ day, dateStr, sessions, today, currentMonth, onDayClick,
             <button
               key={s.id}
               className="calendar-session-chip"
-              style={{ background: c.bg, color: c.text, borderLeftColor: c.border }}
+              style={{
+                background: `linear-gradient(135deg, ${c.bg}, transparent)`,
+                color: c.text,
+                borderLeft: `3px solid ${c.border}`,
+                borderRadius: 6,
+                padding: '3px 6px',
+                fontSize: 11,
+                fontWeight: 500,
+                cursor: 'pointer',
+                border: 'none',
+                textAlign: 'left',
+                width: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateX(2px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateX(0)'; }}
               onClick={(e) => { e.stopPropagation(); onSessionClick(s); }}
               title={`${s.session_type} — ${s.start_time}${s.case_number ? ` (${s.case_number})` : ''}`}
             >
-              <span className="chip-time">{s.start_time}</span>
-              <span className="chip-title">{s.case_number || s.session_type}</span>
+              <span className="chip-time" style={{ fontWeight: 600 }}>{s.start_time}</span>
+              <span className="chip-title" style={{ marginLeft: 4 }}>{s.case_number || s.session_type}</span>
             </button>
           );
         })}
         {daySessions.length > maxVisible && (
-          <span className="calendar-more">+{daySessions.length - maxVisible} more</span>
+          <span className="calendar-more" style={{ fontSize: 10, opacity: 0.6, fontWeight: 500 }}>
+            +{daySessions.length - maxVisible} more
+          </span>
         )}
       </div>
     </motion.div>
   );
 }
 
+// ── Main Calendar Page ────────────────────────────────────
 export default function Calendar() {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
@@ -327,7 +402,6 @@ export default function Calendar() {
   const monthRange = useMemo(() => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    // Pad to start from Sunday
     const padStart = firstDay.getDay();
     const padEnd = 6 - lastDay.getDay();
     const fromDate = new Date(year, month, 1 - padStart);
@@ -371,11 +445,8 @@ export default function Calendar() {
       const week = [];
       for (let d = 0; d < 7; d++) {
         if (w === 0 && d < padStart) {
-          // Previous month
-          const dStr = `${year}-${String(month).padStart(2, '0')}-${String(prevMonthDays - padStart + d + 1).padStart(2, '0')}`;
           week.push({ display: null, dateStr: null, sessions: [] });
         } else if (day > daysInMonth) {
-          // Next month
           week.push({ display: null, dateStr: null, sessions: [] });
           nextMonthDay++;
         } else {
@@ -443,17 +514,28 @@ export default function Calendar() {
   return (
     <motion.div
       className="calendar-page"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
+      style={pageContainer}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
     >
-      {/* Header */}
+      {/* ── Page header ────────────────────────────────── */}
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+          Court Calendar
+        </h1>
+        <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: 15 }}>
+          Manage and view court sessions
+        </p>
+      </div>
+
+      {/* ── Controls bar ──────────────────────────────── */}
       <div className="calendar-header">
         <div className="calendar-nav">
           <motion.button className="btn btn-ghost btn-sm" onClick={prevMonth} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} aria-label="Previous month">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
           </motion.button>
-          <h3 className="calendar-title">{MONTHS[month]} {year}</h3>
+          <h3 className="calendar-title" style={{ fontSize: 18, fontWeight: 600, minWidth: 160, textAlign: 'center' }}>{MONTHS[month]} {year}</h3>
           <motion.button className="btn btn-ghost btn-sm" onClick={nextMonth} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} aria-label="Next month">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
           </motion.button>
@@ -478,8 +560,8 @@ export default function Calendar() {
         </div>
       </div>
 
-      {/* Summary bar */}
-      <div className="calendar-summary">
+      {/* ── Summary bar ───────────────────────────────── */}
+      <div className="calendar-summary" style={{ marginBottom: error ? 0 : 20 }}>
         <span className="calendar-summary-item">
           <strong>{sessionCount}</strong> session{sessionCount !== 1 ? 's' : ''} this month
         </span>
@@ -494,61 +576,115 @@ export default function Calendar() {
         })}
       </div>
 
-      {/* Loading / Error */}
+      {/* ── Error state ───────────────────────────────── */}
       {error && (
-        <div className="error-state" style={{ marginBottom: 16 }}>
+        <motion.div
+          className="error-state"
+          style={{ marginBottom: 20 }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           <p>{error}</p>
           <button className="btn btn-ghost btn-sm" onClick={fetchSessions}>Retry</button>
-        </div>
+        </motion.div>
       )}
 
-      {/* Calendar Grid */}
-      {loading ? (
-        <div className="calendar-grid-skeleton">
-          {Array.from({ length: 5 }).map((_, w) => (
-            <div key={w} className="calendar-week-skeleton">
-              {Array.from({ length: 7 }).map((_, d) => (
-                <div key={d} className="skeleton" style={{ height: 100, borderRadius: 8 }} />
-              ))}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="calendar-grid">
-          <div className="calendar-weekdays">
-            {DAYS.map(d => <div key={d} className="calendar-weekday">{d}</div>)}
-          </div>
-          {calendarGrid.map((week, wi) => (
-            <div key={wi} className="calendar-week">
-              {week.map((cell, di) => (
-                <CalendarCell
-                  key={di}
-                  day={cell.display}
-                  dateStr={cell.dateStr}
-                  sessions={cell.sessions}
-                  today={todayStr}
-                  currentMonth={cell.dateStr !== null}
-                  onDayClick={handleDayClick}
-                  onSessionClick={handleSessionClick}
+      {/* ── Glass card content area ──────────────────── */}
+      <motion.div
+        style={glassCard}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.08, ease: 'easeOut' }}
+      >
+        {loading ? (
+          /* ── Loading skeleton ───────────────────────── */
+          <div style={{ padding: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 14 }}>
+              {DAYS.map(d => (
+                <div
+                  key={d}
+                  className="skeleton"
+                  style={{ ...skeletonItem, height: 14, borderRadius: 4 }}
                 />
               ))}
             </div>
-          ))}
-        </div>
-      )}
+            {[0, 1, 2, 3, 4].map(w => (
+              <div
+                key={w}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(7, 1fr)',
+                  gap: 6,
+                  marginBottom: 6,
+                }}
+              >
+                {[0, 1, 2, 3, 4, 5, 6].map(d => (
+                  <div
+                    key={d}
+                    className="skeleton"
+                    style={{ ...skeletonItem, height: 100 }}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : sessions.length > 0 ? (
+          /* ── Calendar grid ──────────────────────────── */
+          <div className="calendar-grid">
+            <div className="calendar-weekdays">
+              {DAYS.map(d => <div key={d} className="calendar-weekday" style={{ fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', opacity: 0.6 }}>{d}</div>)}
+            </div>
+            {calendarGrid.map((week, wi) => (
+              <motion.div
+                key={wi}
+                className="calendar-week"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.04 * wi, duration: 0.2 }}
+              >
+                {week.map((cell, di) => (
+                  <CalendarCell
+                    key={di}
+                    day={cell.display}
+                    dateStr={cell.dateStr}
+                    sessions={cell.sessions}
+                    today={todayStr}
+                    currentMonth={cell.dateStr !== null}
+                    onDayClick={handleDayClick}
+                    onSessionClick={handleSessionClick}
+                  />
+                ))}
+              </motion.div>
+            ))}
+          </div>
+        ) : !error ? (
+          /* ── Empty state ────────────────────────────── */
+          <div style={{ padding: '64px 24px', textAlign: 'center' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" style={emptyIcon}>
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <h3 style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 18 }}>No sessions scheduled</h3>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: 380, margin: '0 auto 24px', lineHeight: 1.6, fontSize: 14 }}>
+              Click <strong>"New Session"</strong> to schedule a court session for this month.
+            </p>
+            <motion.button
+              className="btn btn-primary btn-sm"
+              onClick={handleNewSession}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6 }}>
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              New Session
+            </motion.button>
+          </div>
+        ) : null}
+      </motion.div>
 
-      {/* Empty state */}
-      {!loading && !error && sessions.length === 0 && (
-        <div className="empty-state" style={{ marginTop: 24 }}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
-          <h3>No sessions scheduled</h3>
-          <p>Click "New Session" to schedule a court session for this month.</p>
-        </div>
-      )}
-
-      {/* Session create/edit modal */}
+      {/* ── Session create/edit modal ─────────────────── */}
       <AnimatePresence>
         {showModal && (
           <SessionModal
@@ -562,7 +698,7 @@ export default function Calendar() {
         )}
       </AnimatePresence>
 
-      {/* Session detail modal */}
+      {/* ── Session detail modal ──────────────────────── */}
       <AnimatePresence>
         {viewingSession && (
           <SessionDetailModal
@@ -572,7 +708,7 @@ export default function Calendar() {
         )}
       </AnimatePresence>
 
-      {/* Session detail → edit */}
+      {/* ── Session detail → edit FAB ─────────────────── */}
       {viewingSession && (
         <motion.button
           className="btn btn-primary btn-sm"

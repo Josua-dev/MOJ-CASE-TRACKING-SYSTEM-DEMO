@@ -179,10 +179,50 @@ function Shell() {
   return (
     <div className="app-shell">
       <Sidebar page={page} setPage={navigateTo} isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+
+      {/* Subtle animated background gradient */}
+      <div aria-hidden="true" style={{
+        position: 'fixed',
+        inset: 0,
+        pointerEvents: 'none',
+        zIndex: 0,
+        overflow: 'hidden',
+      }}>
+        <motion.div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            width: 600,
+            height: 600,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, var(--primary-light) 0%, transparent 70%)',
+            left: -200,
+            top: -100,
+            opacity: 0.5,
+          }}
+          animate={{ x: [0, 40, 0], y: [0, -30, 0] }}
+          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            width: 500,
+            height: 500,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)',
+            right: -150,
+            bottom: -80,
+          }}
+          animate={{ x: [0, -30, 0], y: [0, 20, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
+
       <div className="main-area">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="hamburger-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+            <button className="hamburger-btn" onClick={() => setMobileMenuOpen(true)} aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileMenuOpen} aria-controls="sidebar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20" strokeLinecap="round">
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
@@ -205,19 +245,32 @@ function Shell() {
           <AnimatePresence mode="wait">
             <motion.div
               key={page}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -6, filter: 'blur(2px)' }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              style={{ transformOrigin: 'top center' }}
             >
-              <Suspense fallback={<LoadingFallback />}>
-                {page === 'dashboard' && <Dashboard />}
-                {page === 'cases' && <Cases />}
-                {page === 'visualisations' && <Visualisations />}
-                {page === 'users' && <Users />}
-                {page === 'calendar' && <Calendar />}
-                {page === 'reports' && <Reports />}
-              </Suspense>
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
+                  },
+                }}
+                initial="hidden"
+                animate="visible"
+              >
+                <Suspense fallback={<LoadingFallback />}>
+                  {page === 'dashboard' && <Dashboard />}
+                  {page === 'cases' && <Cases />}
+                  {page === 'visualisations' && <Visualisations />}
+                  {page === 'users' && <Users />}
+                  {page === 'calendar' && <Calendar />}
+                  {page === 'reports' && <Reports />}
+                </Suspense>
+              </motion.div>
             </motion.div>
           </AnimatePresence>
         </main>

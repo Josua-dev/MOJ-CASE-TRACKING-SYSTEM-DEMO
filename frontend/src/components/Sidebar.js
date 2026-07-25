@@ -77,6 +77,13 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
 
+  const activeNavStyle = {
+    boxShadow: 'inset 3px 0 0 var(--primary)',
+  };
+
+  const navHover = { x: 3 };
+  const navTap = { scale: 0.97 };
+
   return (
     <>
       <AnimatePresence>
@@ -88,14 +95,24 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
+            style={{
+              backdropFilter: 'blur(4px)',
+              WebkitBackdropFilter: 'blur(4px)',
+            }}
           />
         )}
       </AnimatePresence>
       <motion.aside
+        id="sidebar"
         className={`sidebar ${isOpen ? 'sidebar-mobile-open' : ''}`}
         initial={{ opacity: 0, x: -16 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
+        style={{
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          background: 'color-mix(in srgb, var(--surface) 88%, transparent)',
+        }}
       >
         <div className="sidebar-header">
           <div className="sidebar-brand">
@@ -104,7 +121,7 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
           <button className="sidebar-mobile-close" onClick={onClose} aria-label="Close menu">&times;</button>
         </div>
 
-      <nav className="sidebar-nav" aria-label="Main navigation">
+      <nav className="sidebar-nav" id="main-navigation" aria-label="Main navigation">
         <div className="sidebar-section">
           <p className="sidebar-label">Main</p>
 
@@ -112,9 +129,10 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
             className={`nav-link ${page === 'dashboard' ? 'active' : ''}`}
             onClick={() => setPage('dashboard')}
             aria-current={page === 'dashboard' ? 'page' : undefined}
-            whileHover={{ x: 2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={navHover}
+            whileTap={navTap}
             transition={{ duration: 0.15 }}
+            style={page === 'dashboard' ? activeNavStyle : undefined}
           >
             {icons.dashboard}
             <span>Dashboard</span>
@@ -124,9 +142,10 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
             className={`nav-link ${page === 'cases' ? 'active' : ''}`}
             onClick={() => setPage('cases')}
             aria-current={page === 'cases' ? 'page' : undefined}
-            whileHover={{ x: 2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={navHover}
+            whileTap={navTap}
             transition={{ duration: 0.15 }}
+            style={page === 'cases' ? activeNavStyle : undefined}
           >
             {icons.cases}
             <span>Cases</span>
@@ -138,9 +157,10 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
               className={`nav-link ${page === 'visualisations' ? 'active' : ''}`}
               onClick={() => setPage('visualisations')}
               aria-current={page === 'visualisations' ? 'page' : undefined}
-              whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={navHover}
+              whileTap={navTap}
               transition={{ duration: 0.15 }}
+              style={page === 'visualisations' ? activeNavStyle : undefined}
             >
               {icons.visualisations}
               <span>Visualisations</span>
@@ -152,9 +172,10 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
               className={`nav-link ${page === 'calendar' ? 'active' : ''}`}
               onClick={() => setPage('calendar')}
               aria-current={page === 'calendar' ? 'page' : undefined}
-              whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={navHover}
+              whileTap={navTap}
               transition={{ duration: 0.15 }}
+              style={page === 'calendar' ? activeNavStyle : undefined}
             >
               {icons.calendar}
               <span>Calendar</span>
@@ -166,9 +187,10 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
               className={`nav-link ${page === 'reports' ? 'active' : ''}`}
               onClick={() => setPage('reports')}
               aria-current={page === 'reports' ? 'page' : undefined}
-              whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={navHover}
+              whileTap={navTap}
               transition={{ duration: 0.15 }}
+              style={page === 'reports' ? activeNavStyle : undefined}
             >
               {icons.reports}
               <span>Reports</span>
@@ -180,9 +202,10 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
               className={`nav-link ${page === 'users' ? 'active' : ''}`}
               onClick={() => setPage('users')}
               aria-current={page === 'users' ? 'page' : undefined}
-              whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={navHover}
+              whileTap={navTap}
               transition={{ duration: 0.15 }}
+              style={page === 'users' ? activeNavStyle : undefined}
             >
               {icons.users}
               <span>Users</span>
@@ -200,8 +223,8 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
               document.dispatchEvent(ev);
             }}
             aria-label="Keyboard shortcuts"
-            whileHover={{ x: 2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={navHover}
+            whileTap={navTap}
             transition={{ duration: 0.15 }}
           >
             {icons.shortcuts}
@@ -211,8 +234,8 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
           <motion.button
             className="nav-link"
             onClick={logout}
-            whileHover={{ x: 2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={navHover}
+            whileTap={navTap}
             transition={{ duration: 0.15 }}
           >
             {icons.logout}
@@ -226,16 +249,21 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
           className="sidebar-user"
           onClick={() => setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light')}
           whileHover={{ backgroundColor: 'var(--surface-hover)' }}
+          whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.15 }}
+          style={{ cursor: 'pointer' }}
         >
-          <div className="sidebar-avatar">
+          <div className="sidebar-avatar" style={{
+            background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          }}>
             {user?.name?.charAt(0).toUpperCase() || '?'}
           </div>
           <div className="sidebar-user-info">
             <div className="name">{user?.name || 'User'}</div>
             <div className="role">{user?.role || ''}</div>
           </div>
-          <div className="theme-toggle" onClick={e => e.stopPropagation()} role="radiogroup" aria-label="Theme">
+          <div className="theme-toggle" onClick={e => e.stopPropagation()} role="radiogroup" aria-label="Theme" style={{ position: 'relative' }}>
             {['light','system','dark'].map(t => (
               <motion.button
                 key={t}
@@ -244,7 +272,7 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
                 role="radio"
                 aria-checked={theme === t}
                 aria-label={`${t} theme`}
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ duration: 0.12 }}
               >

@@ -59,6 +59,9 @@
   --shadow-md: 0 4px 8px rgba(15,23,36,0.06), 0 2px 4px rgba(15,23,36,0.04);
   --shadow-lg: 0 12px 24px rgba(15,23,36,0.08), 0 4px 8px rgba(15,23,36,0.04);
   --shadow-xl: 0 24px 48px rgba(15,23,36,0.12), 0 8px 16px rgba(15,23,36,0.06);
+
+  --glass-bg: rgba(255,255,255,0.88);
+  --glass-border: rgba(255,255,255,0.15);
 }
 
 /* ── Design Tokens (Dark) ───────────────────────────────── */
@@ -101,6 +104,9 @@
   --shadow-md: 0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
   --shadow-lg: 0 12px 24px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
   --shadow-xl: 0 24px 48px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.3);
+
+  --glass-bg: rgba(19,28,47,0.88);
+  --glass-border: rgba(255,255,255,0.07);
 }
 
 [data-theme="dark"] img,
@@ -144,6 +150,9 @@
     --shadow-md: 0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
     --shadow-lg: 0 12px 24px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
     --shadow-xl: 0 24px 48px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.3);
+
+    --glass-bg: rgba(19,28,47,0.88);
+    --glass-border: rgba(255,255,255,0.07);
   }
 }
 
@@ -1886,15 +1895,15 @@ a:hover { text-decoration: underline; }
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--surface-active) 25%, var(--surface-hover) 50%, var(--surface-active) 75%);
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+  animation: shimmer 1.5s infinite;
   border-radius: var(--radius-sm);
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* ── Empty state ────────────────────────────────── */
@@ -2028,6 +2037,44 @@ a:hover { text-decoration: underline; }
 .text-muted { color: var(--text-tertiary); }
 .text-xs { font-size: 0.75rem; }
 .text-sm { font-size: 0.82rem; }
+
+/* ══════════════════════════════════════════════════════════════
+   Magic UI — Animations & Flourishes
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Blur Fade Animation ──────────────────────── */
+@keyframes blurFadeIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+.animate-blur-fade { animation: blurFadeIn 0.6s ease-out both; }
+
+/* ── Slide Up Animation ────────────────────────── */
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.animate-slide-up { animation: slideUp 0.5s ease-out both; }
+
+/* ── Scale In Animation ────────────────────────── */
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.animate-scale-in { animation: scaleIn 0.3s ease-out both; }
+
+/* ── Stagger Children ──────────────────────────── */
+.stagger-children > * { opacity: 0; animation: slideUp 0.4s ease-out both; }
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
+
+/* ── Gradient Text ──────────────────────────────── */
+.gradient-text { background: linear-gradient(135deg, var(--primary), #009543); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* ── Shimmer Loading ───────────────────────────── */
+/* .skeleton and @keyframes shimmer defined in Loading section above */
+
+/* ── Grid Background ───────────────────────────── */
+.grid-bg { background-image: radial-gradient(circle, var(--border) 1px, transparent 1px); background-size: 30px 30px; }
 
 /* ══════════════════════════════════════════════════════════════
    Responsive
@@ -2518,3 +2565,64 @@ a:hover { text-decoration: underline; }
 }
 
 .offline-indicator svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ── Icon Button ────────────────────────────── */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+}
+.btn-icon:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+.btn-icon:active {
+  transform: scale(0.95);
+}
+.btn-icon:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ── Marquee ────────────────────────────────── */
+.marquee-container {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+.marquee-content {
+  display: flex;
+  gap: var(--space-6);
+  animation: marqueeScroll 30s linear infinite;
+  width: max-content;
+}
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Stagger Enter Utility ──────────────────── */
+.stagger-enter > * {
+  opacity: 0;
+  animation: slideUp 0.4s ease-out both;
+}
+.stagger-enter > *:nth-child(1) { animation-delay: 0.03s; }
+.stagger-enter > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger-enter > *:nth-child(3) { animation-delay: 0.09s; }
+.stagger-enter > *:nth-child(4) { animation-delay: 0.12s; }
+.stagger-enter > *:nth-child(5) { animation-delay: 0.15s; }
+.stagger-enter > *:nth-child(6) { animation-delay: 0.18s; }
+.stagger-enter > *:nth-child(7) { animation-delay: 0.21s; }
+.stagger-enter > *:nth-child(8) { animation-delay: 0.24s; }
+.stagger-enter > *:nth-child(9) { animation-delay: 0.27s; }
+.stagger-enter > *:nth-child(10) { animation-delay: 0.30s; }
