@@ -62,6 +62,7 @@
 
   --glass-bg: rgba(255,255,255,0.88);
   --glass-border: rgba(255,255,255,0.15);
+  --glass-solid: #1b2838;
 }
 
 /* ── Design Tokens (Dark) ───────────────────────────────── */
@@ -107,6 +108,7 @@
 
   --glass-bg: rgba(19,28,47,0.88);
   --glass-border: rgba(255,255,255,0.07);
+  --glass-solid: #131c2f;
 }
 
 [data-theme="dark"] img,
@@ -153,6 +155,7 @@
 
     --glass-bg: rgba(19,28,47,0.88);
     --glass-border: rgba(255,255,255,0.07);
+    --glass-solid: #131c2f;
   }
 }
 
@@ -176,6 +179,35 @@ a { color: var(--primary); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 ::selection { background: var(--primary); color: var(--text-inverse); }
+
+/* ── Focus visible ──────────────────────────── */
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Ensure every interactive element class has a visible focus indicator */
+.btn:focus-visible,
+.nav-link:focus-visible,
+.modal-close:focus-visible,
+.theme-option:focus-visible,
+.pagination-btn:focus-visible,
+.sidebar-user:focus-visible,
+.search-result-item:focus-visible,
+.calendar-session-chip:focus-visible,
+.vis-category-btn:focus-visible,
+.detail-tab:focus-visible,
+.builder-tab:focus-visible,
+.chart-type-option:focus-visible,
+.hamburger-btn:focus-visible,
+.sidebar-mobile-close:focus-visible,
+.search-bar-clear:focus-visible,
+.notif-bell:focus-visible,
+.toast-dismiss:focus-visible,
+.colour-theme-swatch:focus-visible,
+.report-search-item:focus-visible,
+.filter-select:focus-visible,
+.sortable:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 
 /* ── Scrollbar ──────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -246,7 +278,8 @@ a:hover { text-decoration: underline; }
 /* ── Glass Card ──────────────────────────────────── */
 
 .glass-card {
-  background: rgba(27, 40, 56, 0.75);
+  position: relative;
+  background: rgba(27, 40, 56, 0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -255,7 +288,23 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+/* Solid background layer underneath glass for text contrast */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xl);
+  background: var(--glass-solid);
+  z-index: -1;
+}
+
 .login-glass-card { width: 100%; max-width: 420px; }
+
+/* Override text on login glass card for WCAG 1.4.3 Contrast Minimum (4.5:1) */
+.login-glass-card .moj-logo-republic,
+.login-glass-card .login-footer {
+  color: #cbd5e1;
+}
 
 /* ── Logo ────────────────────────────────────────── */
 
@@ -2626,3 +2675,15 @@ a:hover { text-decoration: underline; }
 .stagger-enter > *:nth-child(8) { animation-delay: 0.24s; }
 .stagger-enter > *:nth-child(9) { animation-delay: 0.27s; }
 .stagger-enter > *:nth-child(10) { animation-delay: 0.30s; }
+
+/* ── High Contrast Mode ───────────────────────── */
+@media (prefers-contrast: high) {
+  .glass-card {
+    background: var(--glass-solid);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .glass-card::before {
+    display: none;
+  }
+}

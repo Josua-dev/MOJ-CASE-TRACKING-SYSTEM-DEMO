@@ -163,6 +163,14 @@ export default function NotificationBell() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.02, duration: 0.12 }}
                       onClick={() => !n.read && markRead(n.id)}
+                      tabIndex={0}
+                      role="button"
+                      onKeyDown={(e) => {
+                        if (!n.read && (e.key === 'Enter' || e.key === ' ')) {
+                          e.preventDefault();
+                          markRead(n.id);
+                        }
+                      }}
                     >
                       <div className="notif-icon" style={{ background: c.bg, color: c.text }}>
                         {ICONS[n.type] || ICONS.info}

@@ -13,6 +13,7 @@ export default function SearchBar({ navigateTo }) {
   const inputRef = useRef(null);
   const panelRef = useRef(null);
   const listRef = useRef(null);
+  const listboxIdRef = useRef(`search-listbox-${Math.random().toString(36).substring(2, 9)}`);
 
   // Debounce query
   useEffect(() => {
@@ -118,6 +119,11 @@ export default function SearchBar({ navigateTo }) {
   };
 
   const showPanel = focused && query.trim().length >= 1;
+  const listboxId = listboxIdRef.current;
+  const items = allResults();
+  const activeDescendant = selectedIndex >= 0 && selectedIndex < items.length ? `${listboxId}-option-${selectedIndex}` : undefined;
+  const caseCount = results?.cases?.length ?? 0;
+  const docCount = results?.documents?.length ?? 0;
 
   return (
     <div className="search-bar-container">
@@ -134,6 +140,11 @@ export default function SearchBar({ navigateTo }) {
           onChange={e => { setQuery(e.target.value); setSelectedIndex(-1); }}
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
+          role="combobox"
+          aria-expanded={showPanel}
+          aria-controls={showPanel ? listboxId : undefined}
+          aria-activedescendant={activeDescendant}
+          aria-haspopup="listbox"
           aria-label="Global search"
           autoComplete="off"
         />
@@ -170,60 +181,83 @@ export default function SearchBar({ navigateTo }) {
                 <span className="text-xs text-muted">Try different keywords or check spelling</span>
               </div>
             ) : (
-              <div className="search-results" ref={listRef}>
+              <div className="search-results" ref={listRef} role="listbox" id={listboxId}>
                 {results.cases?.length > 0 && (
-                  <div className="search-group">
-                    <div className="search-group-label">
+                  <div className="search-group" role="presentation">
+                    <div className="search-group-label" role="presentation">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                       Cases
                     </div>
-                    {results.cases.map((c, i) => (
-                      <button
-                        key={c.id}
-                        className={`search-result-item ${allResults().indexOf({ ...c, _type: 'case' }) === selectedIndex ? 'selected' : ''}`}
-                        onClick={() => handleSelect({ ...c, _type: 'case' })}
-                        onMouseEnter={() => setSelectedIndex(allResults().indexOf({ ...c, _type: 'case' }))}
-                        dangerouslySetInnerHTML={{
-                          __html: `<span class="search-result-primary">${c.title_hl || c.title}</span><span class="search-result-secondary">${c.case_number_hl || c.case_number} — ${c.case_type}</span>`
-                        }}
-                      />
-                    ))}
+                    {results.cases.map((c, i) => {
+                      const globalIdx = i;
+                      const optionId = `${listboxId}-option-${globalIdx}`;
+                      return (
+                        <button
+                          key={c.id}
+                          id={optionId}
+                          role="option"
+                          aria-selected={globalIdx === selectedIndex}
+                          className={`search-result-item ${globalIdx === selectedIndex ? 'selected' : ''}`}
+                          onClick={() => handleSelect({ ...c, _type: 'case' })}
+                          onMouseEnter={() => setSelectedIndex(globalIdx)}
+                          dangerouslySetInnerHTML={{
+                            __html: `<span class="search-result-primary">${c.title_hl || c.title}</span><span class="search-result-secondary">${c.case_number_hl || c.case_number} — ${c.case_type}</span>`
+                          }}
+                        />
+                      );
+                    })}
                   </div>
                 )}
                 {results.documents?.length > 0 && (
-                  <div className="search-group">
-                    <div className="search-group-label">
+                  <div className="search-group" role="presentation">
+                    <div className="search-group-label" role="presentation">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                       Documents
                     </div>
-                    {results.documents.map((d, i) => (
-                      <button
-                        key={d.id}
-                        className={`search-result-item ${allResults().indexOf({ ...d, _type: 'document' }) === selectedIndex ? 'selected' : ''}`}
-                        onClick={() => handleSelect({ ...d, _type: 'document' })}
-                        dangerouslySetInnerHTML={{
-                          __html: `<span class="search-result-primary">${d.name_hl || d.original_name}</span><span class="search-result-secondary">${d.case_number || ''} — ${(d.size / 1024).toFixed(1)} KB</span>`
-                        }}
-                      />
-                    ))}
+                    {results.documents.map((d, i) => {
+                      const globalIdx = caseCount + i;
+                      const optionId = `${listboxId}-option-${globalIdx}`;
+                      return (
+                        <button
+                          key={d.id}
+                          id={optionId}
+                          role="option"
+                          aria-selected={globalIdx === selectedIndex}
+                          className={`search-result-item ${globalIdx === selectedIndex ? 'selected' : ''}`}
+                          onClick={() => handleSelect({ ...d, _type: 'document' })}
+                          onMouseEnter={() => setSelectedIndex(globalIdx)}
+                          dangerouslySetInnerHTML={{
+                            __html: `<span class="search-result-primary">${d.name_hl || d.original_name}</span><span class="search-result-secondary">${d.case_number || ''} — ${(d.size / 1024).toFixed(1)} KB</span>`
+                          }}
+                        />
+                      );
+                    })}
                   </div>
                 )}
                 {results.logs?.length > 0 && (
-                  <div className="search-group">
-                    <div className="search-group-label">
+                  <div className="search-group" role="presentation">
+                    <div className="search-group-label" role="presentation">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                       Activity Logs
                     </div>
-                    {results.logs.map((l, i) => (
-                      <button
-                        key={l.id}
-                        className={`search-result-item ${allResults().indexOf({ ...l, _type: 'log' }) === selectedIndex ? 'selected' : ''}`}
-                        onClick={() => handleSelect({ ...l, _type: 'log' })}
-                        dangerouslySetInnerHTML={{
-                          __html: `<span class="search-result-primary">${l.action_hl || l.action}</span><span class="search-result-secondary">${l.case_number || ''} — ${l.performed_at || ''}</span>`
-                        }}
-                      />
-                    ))}
+                    {results.logs.map((l, i) => {
+                      const globalIdx = caseCount + docCount + i;
+                      const optionId = `${listboxId}-option-${globalIdx}`;
+                      return (
+                        <button
+                          key={l.id}
+                          id={optionId}
+                          role="option"
+                          aria-selected={globalIdx === selectedIndex}
+                          className={`search-result-item ${globalIdx === selectedIndex ? 'selected' : ''}`}
+                          onClick={() => handleSelect({ ...l, _type: 'log' })}
+                          onMouseEnter={() => setSelectedIndex(globalIdx)}
+                          dangerouslySetInnerHTML={{
+                            __html: `<span class="search-result-primary">${l.action_hl || l.action}</span><span class="search-result-secondary">${l.case_number || ''} — ${l.performed_at || ''}</span>`
+                          }}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </div>

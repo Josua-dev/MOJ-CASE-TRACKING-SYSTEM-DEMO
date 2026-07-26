@@ -91,10 +91,14 @@ export default function VisBuilder({ existing, onClose, onSaved }) {
 
         <div className="builder-layout" style={{ display: 'flex', minHeight: 400 }}>
           {/* Tab sidebar */}
-          <div className="builder-tabs">
+          <div className="builder-tabs" role="tablist" aria-label="Visualisation builder tabs">
             {TABS.map(tab => (
               <button
                 key={tab.key}
+                role="tab"
+                id={`tab-${tab.key}`}
+                aria-selected={activeTab === tab.key}
+                aria-controls={`tabpanel-${tab.key}`}
                 className={`builder-tab ${activeTab === tab.key ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.key)}
               >
@@ -108,6 +112,9 @@ export default function VisBuilder({ existing, onClose, onSaved }) {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
+                role="tabpanel"
+                id={`tabpanel-${activeTab}`}
+                aria-labelledby={`tab-${activeTab}`}
                 initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
@@ -118,8 +125,9 @@ export default function VisBuilder({ existing, onClose, onSaved }) {
                     <h4>General Settings</h4>
                     <div className="form-row">
                       <div className="form-group" style={{ flex: 1 }}>
-                        <label className="form-label">Name *</label>
+                        <label className="form-label" htmlFor="vis-name">Name *</label>
                         <input
+                          id="vis-name"
                           className={`form-input ${errors.name ? 'form-input-error' : ''}`}
                           value={form.name}
                           onChange={e => set('name', e.target.value)}
@@ -130,8 +138,9 @@ export default function VisBuilder({ existing, onClose, onSaved }) {
                       </div>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Description</label>
+                      <label className="form-label" htmlFor="vis-description">Description</label>
                       <textarea
+                        id="vis-description"
                         className="form-input"
                         value={form.description}
                         onChange={e => set('description', e.target.value)}
@@ -141,8 +150,8 @@ export default function VisBuilder({ existing, onClose, onSaved }) {
                     </div>
                     <div className="form-row">
                       <div className="form-group" style={{ flex: 1 }}>
-                        <label className="form-label">Category</label>
-                        <select className="form-input" value={form.category} onChange={e => set('category', e.target.value)}>
+                        <label className="form-label" htmlFor="vis-category">Category</label>
+                        <select id="vis-category" className="form-input" value={form.category} onChange={e => set('category', e.target.value)}>
                           <option value="">No category</option>
                           {CATEGORIES.filter(c => c.key).map(c => (
                             <option key={c.key} value={c.key}>{c.label}</option>
@@ -150,8 +159,9 @@ export default function VisBuilder({ existing, onClose, onSaved }) {
                         </select>
                       </div>
                       <div className="form-group" style={{ flex: 1 }}>
-                        <label className="form-label">Tags</label>
+                        <label className="form-label" htmlFor="vis-tags">Tags</label>
                         <input
+                          id="vis-tags"
                           className="form-input"
                           value={form.tags}
                           onChange={e => set('tags', e.target.value)}

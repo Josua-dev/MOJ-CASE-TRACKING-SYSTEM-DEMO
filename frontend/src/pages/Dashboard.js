@@ -1,7 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid } from 'recharts';
+
+import StatCard from '../components/dashboard/StatCard';
+import WelcomeHeader from '../components/dashboard/WelcomeHeader';
 
 // ────────────────────────────────────────────────────────────
 // Namibia flag palette — also used for chart series colours.
@@ -60,43 +63,6 @@ const CHART_COLORS = ['#003580', '#009543', '#C8102E', '#FFB81C', '#00A3E0'];
 })();
 
 // ────────────────────────────────────────────────────────────
-// Animated counter — counts from 0 → value on mount / change
-// ────────────────────────────────────────────────────────────
-function AnimatedCounter({ value, duration = 1500 }) {
-  const [display, setDisplay] = useState(0);
-  const rafRef = useRef(null);
-  const startTimeRef = useRef(null);
-
-  useEffect(() => {
-    if (value === 0) { setDisplay(0); return; }
-
-    startTimeRef.current = null;
-
-    function step(timestamp) {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
-      const elapsed = timestamp - startTimeRef.current;
-      const progress = Math.min(elapsed / duration, 1);
-      // easeOutCubic — smooth deceleration
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(value * eased);
-      setDisplay(current);
-
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(step);
-      }
-    }
-
-    rafRef.current = requestAnimationFrame(step);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [value, duration]);
-
-  return <span>{display.toLocaleString()}</span>;
-}
-
-// ────────────────────────────────────────────────────────────
 // Skeleton components — pulsing glass style
 // ────────────────────────────────────────────────────────────
 function Skeleton({ width = '100%', height = 16, borderRadius = 8, style = {} }) {
@@ -125,7 +91,7 @@ function StatCardSkeleton() {
 }
 
 // ────────────────────────────────────────────────────────────
-// SVG icons (unchanged)
+// SVG icons
 // ────────────────────────────────────────────────────────────
 const FOLDER_ICON = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
@@ -232,7 +198,7 @@ export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(getFormattedDateTime);
   const [userName, setUserName] = useState('');
 
-  // ── Data fetching (unchanged) ───────────────────────────
+  // ── Data fetching ────────────────────────────────────────
   useEffect(() => {
     axios.get('/api/cases/meta/stats')
       .then(({ data }) => setStats(data.data))
@@ -296,46 +262,11 @@ export default function Dashboard() {
     <div style={{ padding: 0 }}>
 
       {/* ══════ Welcome header ══════ */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        style={{ marginBottom: 28 }}
-      >
-        <div style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          gap: 16,
-          flexWrap: 'wrap',
-        }}>
-          <div>
-            <h1 style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-              lineHeight: 1.3,
-            }}>
-              {userName ? `Welcome back, ${userName}` : 'Dashboard'}
-            </h1>
-            <p style={{
-              color: 'var(--text-tertiary)',
-              fontSize: '0.88rem',
-              marginTop: 4,
-            }}>
-              {currentTime.dateStr} &middot; {currentTime.timeStr}
-            </p>
-          </div>
-          <p style={{
-            color: 'var(--text-tertiary)',
-            fontSize: '0.85rem',
-            margin: 0,
-          }}>
-            Case overview and analytics for the Magistrate Court
-          </p>
-        </div>
-      </motion.div>
+      <WelcomeHeader
+        userName={userName}
+        dateStr={currentTime.dateStr}
+        timeStr={currentTime.timeStr}
+      />
 
       {/* ══════ Stat cards ══════ */}
       <motion.div
@@ -346,92 +277,17 @@ export default function Dashboard() {
           visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
         }}
       >
-        {STATS_CARDS.map((c) => {
-          const value = stats[c.key] ?? 0;
-          return (
-            <motion.div
-              key={c.key}
-              className="dash-glass"
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-              style={{
-                padding: 24,
-                position: 'relative',
-                overflow: 'hidden',
-                cursor: 'default',
-              }}
-              whileHover={{
-                y: -3,
-                boxShadow: `0 12px 40px ${c.glow}`,
-                borderColor: 'rgba(255,255,255,0.2)',
-              }}
-            >
-              {/* Corner gradient accent */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: 130,
-                  height: 130,
-                  background: c.gradient,
-                  opacity: 0.06,
-                  borderTopRightRadius: 14,
-                  pointerEvents: 'none',
-                }}
-                aria-hidden="true"
-              />
-
-              <div className="stat-card-top" style={{ marginBottom: 14 }}>
-                <span className="stat-card-label">{c.label}</span>
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    background: c.gradient,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    fontSize: '1.1rem',
-                    boxShadow: `0 4px 12px ${c.glow}`,
-                    position: 'relative',
-                    zIndex: 1,
-                  }}
-                >
-                  {c.icon}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  fontSize: '1.75rem',
-                  fontWeight: 700,
-                  lineHeight: 1.2,
-                  color: 'var(--text-primary)',
-                  marginBottom: 4,
-                  position: 'relative',
-                  zIndex: 1,
-                }}
-              >
-                <AnimatedCounter value={value} duration={1400} />
-              </div>
-
-              <div style={{
-                fontSize: '0.78rem',
-                color: 'var(--text-tertiary)',
-                position: 'relative',
-                zIndex: 1,
-              }}>
-                {c.subtitle}
-              </div>
-            </motion.div>
-          );
-        })}
+        {STATS_CARDS.map((c, i) => (
+          <StatCard
+            key={c.key}
+            title={c.label}
+            value={stats[c.key] ?? 0}
+            icon={c.icon}
+            gradient={c.gradient}
+            subtitle={c.subtitle}
+            glow={c.glow}
+          />
+        ))}
       </motion.div>
 
       {/* ══════ Charts row ══════ */}

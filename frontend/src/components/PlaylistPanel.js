@@ -112,6 +112,7 @@ export default function PlaylistPanel({ visualisations = [], onClose, onRefresh 
           value={newName}
           onChange={e => setNewName(e.target.value)}
           placeholder="New playlist name..."
+          aria-label="Playlist name"
           style={{ marginBottom: 'var(--space-2)' }}
         />
         <input
@@ -119,6 +120,7 @@ export default function PlaylistPanel({ visualisations = [], onClose, onRefresh 
           value={newDesc}
           onChange={e => setNewDesc(e.target.value)}
           placeholder="Description (optional)"
+          aria-label="Playlist description"
           style={{ marginBottom: 'var(--space-2)', fontSize: '0.8rem' }}
         />
         <button className="btn btn-primary btn-sm" onClick={handleCreate} disabled={!newName.trim()}>Create Playlist</button>

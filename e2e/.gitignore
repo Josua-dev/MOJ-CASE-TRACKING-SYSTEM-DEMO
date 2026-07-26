@@ -1,0 +1,6 @@
+# Playwright test results and reports
+test-results/
+playwright-report/
+
+# Playwright browser downloads (managed via `npx playwright install`)
+ms-playwright/

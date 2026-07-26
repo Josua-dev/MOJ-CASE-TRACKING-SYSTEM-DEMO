@@ -378,6 +378,8 @@ export default function CaseDetailModal({ caseData, onClose, onUpdated }) {
             >
               {/* Tab bar */}
               <div
+                role="tablist"
+                aria-label="Case detail tabs"
                 style={{
                   display: 'flex',
                   gap: 0,
@@ -388,6 +390,10 @@ export default function CaseDetailModal({ caseData, onClose, onUpdated }) {
                 {['details', 'documents'].map((t) => (
                   <button
                     key={t}
+                    role="tab"
+                    id={`tab-${t}`}
+                    aria-selected={tab === t}
+                    aria-controls={`tabpanel-${t}`}
                     onClick={() => setTab(t)}
                     style={{
                       padding: '8px 18px',
@@ -413,6 +419,9 @@ export default function CaseDetailModal({ caseData, onClose, onUpdated }) {
                 {tab === 'details' ? (
                   <motion.div
                     key="details"
+                    role="tabpanel"
+                    id="tabpanel-details"
+                    aria-labelledby="tab-details"
                     style={{
                       display: 'grid',
                       gridTemplateColumns: '1fr 1fr',
@@ -832,6 +841,9 @@ export default function CaseDetailModal({ caseData, onClose, onUpdated }) {
                 ) : (
                   <motion.div
                     key="documents"
+                    role="tabpanel"
+                    id="tabpanel-documents"
+                    aria-labelledby="tab-documents"
                     initial={{ opacity: 0, x: 8 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 8 }}

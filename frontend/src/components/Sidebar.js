@@ -248,6 +248,10 @@ export default function Sidebar({ page, setPage, totalCases, isOpen, onClose }) 
         <motion.div
           className="sidebar-user"
           onClick={() => setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'); } }}
+          role="button"
+          tabIndex={0}
+          aria-label="Toggle theme"
           whileHover={{ backgroundColor: 'var(--surface-hover)' }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.15 }}

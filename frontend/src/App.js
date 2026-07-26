@@ -178,6 +178,29 @@ function Shell() {
 
   return (
     <div className="app-shell">
+      <a
+        href="#main-content"
+        className="skip-link"
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          top: 0,
+          zIndex: 9999,
+          padding: '8px 16px',
+          background: 'var(--primary, #4f46e5)',
+          color: '#fff',
+          textDecoration: 'none',
+          borderRadius: '0 0 4px 0',
+          fontSize: '14px',
+          fontWeight: 600,
+          outlineOffset: '2px',
+        }}
+        onFocus={(e) => { e.target.style.left = '0'; }}
+        onBlur={(e) => { e.target.style.left = '-9999px'; }}
+      >
+        Skip to main content
+      </a>
+
       <Sidebar page={page} setPage={navigateTo} isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
       {/* Subtle animated background gradient */}
@@ -241,7 +264,7 @@ function Shell() {
             <span className="topbar-date">{dateStr}</span>
           </div>
         </header>
-        <main className="page-content" role="main">
+        <main className="page-content" id="main-content" role="main">
           <AnimatePresence mode="wait">
             <motion.div
               key={page}

@@ -327,6 +327,7 @@ export default function CaseModal({ onClose, onSaved, existing }) {
           >
             {error && (
               <div
+                role="alert"
                 style={{
                   display: 'flex',
                   alignItems: 'center',

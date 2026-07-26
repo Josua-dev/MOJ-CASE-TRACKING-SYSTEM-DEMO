@@ -1,0 +1,533 @@
+/* ══════════════════════════════════════════════════════════════
+   MOJ Case Tracking System — Design Tokens
+   Ministry of Justice, Republic of Namibia
+   ══════════════════════════════════════════════════════════════
+   This file consolidates ALL CSS custom properties used across
+   the application. Import it as the single source of truth for
+   the design system.
+
+   Usage:
+     @import '../styles/tokens.css';
+
+   or reference variables directly:  var(--primary)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 1: COLOR PALETTE
+   ══════════════════════════════════════════════════════════════ */
+
+:root,
+[data-theme="light"] {
+
+  /* ── 1.1 Surface & Background Colors ──────────────────── */
+
+  /* Main page background — light warm grey */
+  --page-bg: #f4f5f8;
+
+  /* Card, modal, sidebar background — pure white */
+  --surface: #ffffff;
+
+  /* Hover state for cards, table rows, interactive areas */
+  --surface-hover: #f8f9fb;
+
+  /* Active / pressed surface state */
+  --surface-active: #eef0f4;
+
+  /* Elevated surfaces — dropdowns, search panels, notification panels */
+  --surface-raised: #ffffff;
+
+  /* ── 1.2 Border Colors ────────────────────────────────── */
+
+  /* Default border for cards, inputs, tables, modals */
+  --border: #e2e5eb;
+
+  /* Hover border for cards, inputs, interactive elements */
+  --border-hover: #c8cdd6;
+
+  /* Focus ring border color */
+  --border-focus: #8b96a8;
+
+  /* ── 1.3 Text Colors ───────────────────────────────────── */
+
+  /* Primary body text — near-black */
+  --text-primary: #0f1724;
+
+  /* Secondary text — labels, meta, muted content */
+  --text-secondary: #475569;
+
+  /* Tertiary / placeholder text — captions, disabled states */
+  --text-tertiary: #94a3b8;
+
+  /* Text on dark/primary backgrounds — white */
+  --text-inverse: #ffffff;
+
+  /* ── 1.4 Brand Colors ──────────────────────────────────── */
+
+  /* Primary brand — deep Namibia blue */
+  --primary: #0f1f3d;
+
+  /* Primary hover — slightly lighter */
+  --primary-hover: #162b52;
+
+  /* Primary active/pressed */
+  --primary-active: #1c3566;
+
+  /* Primary tint — subtle blue backgrounds (focus rings, active nav, badges) */
+  --primary-light: #ebeff5;
+
+  /* Accent brand — Namibia gold / dune yellow */
+  --accent: #b8942e;
+
+  /* Accent hover */
+  --accent-hover: #a8831e;
+
+  /* Accent active/pressed */
+  --accent-active: #967312;
+
+  /* Accent tint — subtle gold backgrounds */
+  --accent-light: #fef8e6;
+
+  /* ── 1.5 Semantic Colors ───────────────────────────────── */
+
+  /* Success / positive — Namibia green (agriculture) */
+  --success: #0d7c3f;
+  --success-light: #e6f7ee;
+
+  /* Danger / destructive — Namibia red (courage) */
+  --danger: #b91c1c;
+  --danger-light: #fde8e8;
+
+  /* Warning / caution — amber */
+  --warning: #b8860b;
+  --warning-light: #fef3c7;
+
+  /* Info / informational — bright blue */
+  --info: #1e6bb8;
+  --info-light: #e8f0fe;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 2: SPACING SCALE
+   4px-based modular scale: 4 → 8 → 12 → 16 → 20 → 24 → 32 → 40 → 48
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Minimum spacing — badge inners, tight gaps */
+  --space-1: 4px;
+
+  /* Compact padding — button padding, small gaps */
+  --space-2: 8px;
+
+  /* Standard gap — between controls, icon spacing */
+  --space-3: 12px;
+
+  /* Card padding, modal padding, section spacing */
+  --space-4: 16px;
+
+  /* Page content padding, card header */
+  --space-5: 20px;
+
+  /* Wide spacing — glass card padding, major sections */
+  --space-6: 24px;
+
+  /* Large spacing — section margins */
+  --space-8: 32px;
+
+  /* Extra large — empty states, hero sections */
+  --space-10: 40px;
+
+  /* Maximum spacing — layout separation */
+  --space-12: 48px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 3: BORDER RADII
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Small radius — badges, small buttons, theme toggle, pagination */
+  --radius-sm: 4px;
+
+  /* Medium radius — buttons, inputs, basic cards, stat cards */
+  --radius-md: 6px;
+
+  /* Large radius — primary cards, modals, panels */
+  --radius-lg: 8px;
+
+  /* Extra large — glass cards, login cards, modal base */
+  --radius-xl: 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 4: SHADOW SYSTEM
+   Multi-layered box-shadows for realistic elevation.
+   Light mode uses rgba(15,23,36) = --text-primary with varying opacity.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Extra small — subtle card depth */
+  --shadow-xs: 0 1px 2px rgba(15,23,36,0.04);
+
+  /* Small — standard card elevation */
+  --shadow-sm: 0 1px 3px rgba(15,23,36,0.06), 0 1px 2px rgba(15,23,36,0.04);
+
+  /* Medium — dropdowns, tooltips, search panels */
+  --shadow-md: 0 4px 8px rgba(15,23,36,0.06), 0 2px 4px rgba(15,23,36,0.04);
+
+  /* Large — modals, notification panels, elevated overlays */
+  --shadow-lg: 0 12px 24px rgba(15,23,36,0.08), 0 4px 8px rgba(15,23,36,0.04);
+
+  /* Extra large — full-screen modals, install prompt, critical overlays */
+  --shadow-xl: 0 24px 48px rgba(15,23,36,0.12), 0 8px 16px rgba(15,23,36,0.06);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 5: GLASSMORPHISM TOKENS
+   Frosted-glass effect for modals, login cards, and sidebar.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Glass background — semi-transparent white */
+  --glass-bg: rgba(255,255,255,0.88);
+
+  /* Glass border — very subtle white border */
+  --glass-border: rgba(255,255,255,0.15);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 6: DARK MODE TOKENS
+   Override all tokens for dark theme.
+   ══════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+
+  /* ── 6.1 Surface & Background (Dark) ──────────────────── */
+
+  /* Deep navy page background */
+  --page-bg: #0b1120;
+
+  /* Dark card/surface background */
+  --surface: #131c2f;
+
+  /* Subtle lightening on hover */
+  --surface-hover: #18223a;
+
+  /* Active surface state */
+  --surface-active: #1e2a45;
+
+  /* Elevated surfaces in dark mode */
+  --surface-raised: #1a2540;
+
+  /* ── 6.2 Border Colors (Dark) ─────────────────────────── */
+
+  --border: #1e2d4a;
+  --border-hover: #2a3f66;
+  --border-focus: #4a6a99;
+
+  /* ── 6.3 Text Colors (Dark) ───────────────────────────── */
+
+  --text-primary: #edf2f7;
+  --text-secondary: #9baec4;
+  --text-tertiary: #5a7396;
+  --text-inverse: #0f1724;
+
+  /* ── 6.4 Brand Colors (Dark) ──────────────────────────── */
+
+  /* Brighter blue for better contrast on dark backgrounds */
+  --primary: #244380;
+  --primary-hover: #2b5099;
+  --primary-active: #3460b3;
+  --primary-light: #16264a;
+
+  /* Warmer gold for better visibility in dark mode */
+  --accent: #d4a830;
+  --accent-hover: #c4992a;
+  --accent-active: #b08a22;
+  --accent-light: #2a2410;
+
+  /* ── 6.5 Semantic Colors (Dark) ───────────────────────── */
+
+  --success: #22c55e;
+  --success-light: #052e16;
+  --danger: #ef4444;
+  --danger-light: #450a0a;
+  --warning: #eab308;
+  --warning-light: #422006;
+  --info: #3b82f6;
+  --info-light: #0c192e;
+
+  /* ── 6.6 Shadow System (Dark) ──────────────────────────── */
+
+  /* Dark mode shadows use black with higher opacity */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 24px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+  --shadow-xl: 0 24px 48px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.3);
+
+  /* ── 6.7 Glassmorphism (Dark) ─────────────────────────── */
+
+  /* Semi-transparent surface color for glass effect */
+  --glass-bg: rgba(19,28,47,0.88);
+
+  /* Even subtler border in dark mode */
+  --glass-border: rgba(255,255,255,0.07);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 7: SYSTEM PREFERENCE (DARK)
+   Applies dark tokens when user's OS is in dark mode and
+   no explicit theme attribute is set on <html>.
+   ══════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+
+  /* Only apply when NO explicit theme attribute exists */
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+
+    /* Surface & Background */
+    --page-bg: #0b1120;
+    --surface: #131c2f;
+    --surface-hover: #18223a;
+    --surface-active: #1e2a45;
+    --surface-raised: #1a2540;
+
+    /* Borders */
+    --border: #1e2d4a;
+    --border-hover: #2a3f66;
+    --border-focus: #4a6a99;
+
+    /* Text */
+    --text-primary: #edf2f7;
+    --text-secondary: #9baec4;
+    --text-tertiary: #5a7396;
+    --text-inverse: #0f1724;
+
+    /* Brand */
+    --primary: #244380;
+    --primary-hover: #2b5099;
+    --primary-active: #3460b3;
+    --primary-light: #16264a;
+    --accent: #d4a830;
+    --accent-hover: #c4992a;
+    --accent-active: #b08a22;
+    --accent-light: #2a2410;
+
+    /* Semantic */
+    --success: #22c55e;
+    --success-light: #052e16;
+    --danger: #ef4444;
+    --danger-light: #450a0a;
+    --warning: #eab308;
+    --warning-light: #422006;
+    --info: #3b82f6;
+    --info-light: #0c192e;
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-lg: 0 12px 24px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+    --shadow-xl: 0 24px 48px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.3);
+
+    /* Glass */
+    --glass-bg: rgba(19,28,47,0.88);
+    --glass-border: rgba(255,255,255,0.07);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 8: TYPOGRAPHY & BASE
+   Foundation-level styles (not variables — apply directly).
+   ══════════════════════════════════════════════════════════════ */
+
+/* Box-sizing reset — included for completeness */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* Base font size — 15px for professional readability */
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  /* System font stack — native rendering on every platform */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif;
+  background: var(--page-bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Monospace font for case numbers and code blocks */
+/* Usage: font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; */
+
+/* Selection styling */
+::selection {
+  background: var(--primary);
+  color: var(--text-inverse);
+}
+
+/*
+   ── Font Weights Reference ──
+   400 (Regular)    — Body text, most UI text
+   500 (Medium)     — Active nav links, buttons, labels
+   600 (Semibold)   — Subheadings, table headers, nav labels
+   700 (Bold)       — Page titles, stat values
+
+   ── Type Scale Reference ──
+   Dashboard h1:    1.4rem  / 700
+   Page title:      1.3rem  / 600
+   Card title:      0.95-1.05rem / 600
+   Body:            0.85rem / 400
+   Small text:      0.82rem / 400
+   Caption:         0.75rem / 500-600
+   Micro:           0.65-0.7rem / 600
+   Stat value:      1.6rem  / 700
+*/
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 9: ANIMATION TOKENS
+   CSS keyframes shared across the system.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Spinner — rotating circle */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Shimmer — skeleton loading pulse */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Blur fade in — page/component entrance */
+@keyframes blurFadeIn {
+  from { opacity: 0; filter: blur(10px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+
+/* Slide up — list/item entrance */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale in — modal/overlay entrance */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Marquee — horizontal ticker */
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Animation Utility Classes ──────────────────────────── */
+
+.animate-blur-fade {
+  animation: blurFadeIn 0.6s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out both;
+}
+
+/* ── Staggered Children (10 items max) ──────────────────── */
+
+.stagger-children > *,
+.stagger-enter > * {
+  opacity: 0;
+  animation: slideUp 0.4s ease-out both;
+}
+
+.stagger-children > *:nth-child(1)  { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2)  { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3)  { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4)  { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5)  { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6)  { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7)  { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8)  { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(9)  { animation-delay: 0.45s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
+
+.stagger-enter > *:nth-child(1)  { animation-delay: 0.03s; }
+.stagger-enter > *:nth-child(2)  { animation-delay: 0.06s; }
+.stagger-enter > *:nth-child(3)  { animation-delay: 0.09s; }
+.stagger-enter > *:nth-child(4)  { animation-delay: 0.12s; }
+.stagger-enter > *:nth-child(5)  { animation-delay: 0.15s; }
+.stagger-enter > *:nth-child(6)  { animation-delay: 0.18s; }
+.stagger-enter > *:nth-child(7)  { animation-delay: 0.21s; }
+.stagger-enter > *:nth-child(8)  { animation-delay: 0.24s; }
+.stagger-enter > *:nth-child(9)  { animation-delay: 0.27s; }
+.stagger-enter > *:nth-child(10) { animation-delay: 0.30s; }
+
+/* ── Gradient Text ─────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), #009543);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Grid Background Pattern ──────────────────────────── */
+.grid-bg {
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 10: SCROLLBAR STYLING
+   ══════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 11: DARK MODE IMAGE HANDLING
+   ══════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] img,
+[data-theme="dark"] svg:not(.no-theme) {
+  opacity: 0.9;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 12: UTILITY CLASSES
+   ══════════════════════════════════════════════════════════════ */
+
+.text-center { text-align: center; }
+.text-muted  { color: var(--text-tertiary); }
+.text-xs     { font-size: 0.75rem; }
+.text-sm     { font-size: 0.82rem; }
